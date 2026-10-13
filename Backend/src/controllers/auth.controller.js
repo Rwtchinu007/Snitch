@@ -53,3 +53,29 @@ export const register = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+export const login = async(req,res)=>{
+  const {email,password} = req.body;
+
+  const user = await userModel.findOne({email});
+
+  if(!user){
+    return res.status(400).json({message:"Invalid email or password"});
+  }
+
+  const isMatch = await user.comparePassword(password);
+
+  if(!isMatch){
+    return res.status(400).json({message:"Invalid email or password"});
+  }
+
+  await sendTokenResponse(user,res,"User logged in successfully");
+
+}
+
+
+export const googleCallback = async (req, res) => {
+console.log(req.user); // This will log the user profile returned by Google
+res.redirect("http://localhost:5173/"); // Redirect to your desired route after successful authentication
+}
