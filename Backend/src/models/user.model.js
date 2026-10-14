@@ -9,11 +9,13 @@ const userSchema = new mongoose.Schema({
   },
   contact: {
     type: String,
-    required: true,
+    required: false,
   },
   password: {
     type: String,
-    required: true,
+    required: function(){
+      return !this.googleId; // If googleId is not present, password is required
+    },
   },
   fullname: {
     type: String,
@@ -24,6 +26,7 @@ const userSchema = new mongoose.Schema({
     enum: ["buyer", "seller"],
     default: "buyer",
   },
+  googleId:{type:String}
 });
 
 // the pre middleware is used to hash the password before saving it to the database. This ensures that the password is stored securely and cannot be easily accessed by unauthorized users.
