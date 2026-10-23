@@ -115,16 +115,16 @@ const Register = () => {
       {/* ========================================================================= */}
       {/* MOBILE TOP BRAND BAR (Visible only on screens < lg)                       */}
       {/* ========================================================================= */}
-      <header className="lg:hidden w-full flex items-center justify-between px-6 py-4 sm:py-5 border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-20">
+      <header className="lg:hidden w-full flex items-center justify-between px-5 py-3 border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-20">
         <Link
           to="/"
           className="inline-flex items-center gap-2 focus:outline-none"
         >
-          <span className="font-['Manrope',sans-serif] text-xl font-extrabold tracking-[0.25em] uppercase text-neutral-950">
+          <span className="font-['Manrope',sans-serif] text-sm font-extrabold tracking-[0.2em] uppercase text-neutral-950">
             SNITCH
           </span>
         </Link>
-        <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.16em] uppercase text-neutral-500 bg-neutral-100 border border-neutral-200 px-3 py-1 rounded-full">
+        <span className="text-[9px] font-bold tracking-[0.14em] uppercase text-neutral-500 bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-full">
           Sign Up
         </span>
       </header>
@@ -152,33 +152,32 @@ const Register = () => {
         </div>
 
         {/* Content Overlays */}
-        <div className="relative z-10 w-full h-full flex flex-col justify-between p-8 lg:p-12 pointer-events-auto">
+        <div className="relative z-10 w-full h-full flex flex-col justify-between p-8 lg:p-10 pointer-events-auto">
           {/* Top Header / Wordmark */}
           <div className="flex items-center justify-between">
             <Link
               to="/"
               className="group/brand inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded"
             >
-              <span className="font-['Manrope',sans-serif] text-2xl sm:text-3xl tracking-[0.3em] font-extrabold uppercase text-white drop-shadow-sm transition-opacity group-hover/brand:opacity-90">
+              <span className="font-['Manrope',sans-serif] text-base sm:text-lg tracking-[0.25em] font-extrabold uppercase text-white drop-shadow-sm transition-opacity group-hover/brand:opacity-90">
                 SNITCH
               </span>
             </Link>
-            <span className="text-[11px] font-medium tracking-[0.2em] uppercase text-neutral-300 border border-white/20 px-3 py-1 rounded-full backdrop-blur-sm bg-white/5">
+            <span className="text-[9px] font-semibold tracking-[0.16em] uppercase text-neutral-300 border border-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm bg-white/5">
               Autumn / Winter
             </span>
           </div>
 
           {/* Bottom Tagline & Brand Narrative */}
-          <div className="max-w-lg">
-            <p className="text-xs tracking-[0.25em] uppercase font-semibold text-neutral-300 mb-2">
+          <div className="max-w-sm">
+            <p className="text-[9px] tracking-[0.22em] uppercase font-semibold text-neutral-300/80 mb-1">
               Signature Aesthetics
             </p>
-            <h2 className="font-['Manrope',sans-serif] text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+            <h2 className="font-['Manrope',sans-serif] text-lg sm:text-xl lg:text-[22px] font-bold tracking-tight text-white leading-snug">
               Wear your attitude.
             </h2>
-            <p className="text-sm sm:text-base text-neutral-300 mt-2 font-normal leading-relaxed">
-              Curated streetwear and luxury minimalist silhouettes engineered for
-              the uninhibited generation.
+            <p className="text-[11px] sm:text-xs text-neutral-300/80 mt-1 font-normal leading-relaxed max-w-xs">
+              Curated streetwear and luxury minimalist silhouettes engineered for the uninhibited generation.
             </p>
           </div>
         </div>
@@ -187,22 +186,21 @@ const Register = () => {
       {/* ========================================================================= */}
       {/* RIGHT REGISTRATION FORM PANEL                                            */}
       {/* ========================================================================= */}
-      <main className="w-full lg:w-1/2 min-h-[calc(100vh-65px)] lg:min-h-screen lg:h-screen lg:overflow-y-auto flex flex-col justify-center items-center px-6 py-8 sm:px-10 lg:px-12 xl:px-16 bg-[#FAFAFA]">
-        <div className="w-full max-w-md lg:max-w-[430px] my-auto py-2">
+      <main className="w-full lg:w-1/2 min-h-[calc(100vh-65px)] lg:min-h-screen lg:h-screen lg:overflow-y-auto flex flex-col justify-center items-center px-6 py-5 sm:px-10 lg:px-12 bg-[#FAFAFA]">
+        <div className="w-full max-w-[310px] sm:max-w-[325px] my-auto py-2">
           {/* Header Group */}
-          <header className="mb-5 sm:mb-6">
-            <div className="inline-flex items-center gap-2 mb-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-neutral-900" />
-              <span className="text-xs font-bold tracking-[0.2em] uppercase text-neutral-500 font-['Manrope',sans-serif]">
+          <header className="mb-3.5">
+            <div className="inline-flex items-center gap-1.5 mb-1">
+              <span className="h-1 w-1 rounded-full bg-neutral-900" />
+              <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-neutral-400 font-['Manrope',sans-serif]">
                 Create Account
               </span>
             </div>
-            <h1 className="font-['Manrope',sans-serif] text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-[-0.03em] text-neutral-950 leading-[1.15]">
+            <h1 className="font-['Manrope',sans-serif] text-lg sm:text-xl font-bold tracking-tight text-neutral-950 leading-tight">
               Join Snitch
             </h1>
-            <p className="text-sm sm:text-[15px] text-neutral-600 mt-1.5 leading-relaxed font-normal">
-              Sign up to discover the latest drops, member-only privileges, and
-              exclusive styles.
+            <p className="text-[11px] text-neutral-500 mt-0.5 leading-normal font-normal">
+              Sign up to discover the latest drops, member privileges, and exclusive styles.
             </p>
           </header>
 
@@ -210,10 +208,10 @@ const Register = () => {
           {isSuccess && (
             <div
               role="alert"
-              className="mb-5 p-3.5 rounded-xl bg-neutral-900 text-white flex items-start gap-3 transition-all animate-fadeIn"
+              className="mb-3.5 p-2.5 rounded-lg bg-neutral-900 text-white flex items-start gap-2 transition-all animate-fadeIn"
             >
               <svg
-                className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0"
+                className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -225,13 +223,12 @@ const Register = () => {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <div className="text-sm">
+              <div className="text-[11px]">
                 <p className="font-semibold text-white">
                   Account created successfully!
                 </p>
-                <p className="text-neutral-300 mt-0.5 text-xs sm:text-sm leading-relaxed">
-                  Welcome to the Snitch community. Redirecting you to your
-                  wardrobe...
+                <p className="text-neutral-300 mt-0.5 leading-relaxed">
+                  Welcome to the Snitch community. Redirecting you to your wardrobe...
                 </p>
               </div>
             </div>
@@ -241,13 +238,13 @@ const Register = () => {
           <form
             onSubmit={handleSubmit}
             noValidate
-            className="space-y-3.5 sm:space-y-4"
+            className="space-y-2.5"
           >
             {/* 1. Full Name */}
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-[13px] sm:text-sm font-semibold text-neutral-900 mb-1.5 tracking-tight"
+                className="block text-[10px] font-semibold text-neutral-600 uppercase tracking-[0.06em] mb-1"
               >
                 Full Name
               </label>
@@ -263,7 +260,7 @@ const Register = () => {
                 aria-describedby={
                   errors.fullName ? "fullName-error" : undefined
                 }
-                className={`w-full rounded-xl border bg-white px-3.5 py-2.5 sm:py-3 text-sm sm:text-[15px] text-neutral-900 placeholder:text-neutral-400 font-normal transition-all duration-200 outline-none shadow-2xs ${errors.fullName
+                className={`w-full h-8 sm:h-8.5 rounded-md border bg-white px-2.5 text-xs text-neutral-900 placeholder:text-neutral-400 placeholder:text-[11px] font-normal transition-all duration-200 outline-none ${errors.fullName
                   ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                   : "border-neutral-300 hover:border-neutral-400 focus:border-black focus:ring-2 focus:ring-black/10"
                   }`}
@@ -271,9 +268,9 @@ const Register = () => {
               {errors.fullName && (
                 <p
                   id="fullName-error"
-                  className="mt-1.5 text-xs sm:text-[13px] text-red-600 font-medium flex items-center gap-1.5"
+                  className="mt-0.5 text-[10px] text-red-600 font-medium flex items-center gap-1.5"
                 >
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-600 shrink-0" />
                   {errors.fullName}
                 </p>
               )}
@@ -283,7 +280,7 @@ const Register = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-[13px] sm:text-sm font-semibold text-neutral-900 mb-1.5 tracking-tight"
+                className="block text-[10px] font-semibold text-neutral-600 uppercase tracking-[0.06em] mb-1"
               >
                 Email Address
               </label>
@@ -297,7 +294,7 @@ const Register = () => {
                 placeholder="alex@snitch.co"
                 aria-invalid={errors.email ? "true" : "false"}
                 aria-describedby={errors.email ? "email-error" : undefined}
-                className={`w-full rounded-xl border bg-white px-3.5 py-2.5 sm:py-3 text-sm sm:text-[15px] text-neutral-900 placeholder:text-neutral-400 font-normal transition-all duration-200 outline-none shadow-2xs ${errors.email
+                className={`w-full h-8 sm:h-8.5 rounded-md border bg-white px-2.5 text-xs text-neutral-900 placeholder:text-neutral-400 placeholder:text-[11px] font-normal transition-all duration-200 outline-none ${errors.email
                   ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                   : "border-neutral-300 hover:border-neutral-400 focus:border-black focus:ring-2 focus:ring-black/10"
                   }`}
@@ -305,9 +302,9 @@ const Register = () => {
               {errors.email && (
                 <p
                   id="email-error"
-                  className="mt-1.5 text-xs sm:text-[13px] text-red-600 font-medium flex items-center gap-1.5"
+                  className="mt-0.5 text-[10px] text-red-600 font-medium flex items-center gap-1.5"
                 >
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-600 shrink-0" />
                   {errors.email}
                 </p>
               )}
@@ -317,7 +314,7 @@ const Register = () => {
             <div>
               <label
                 htmlFor="contact"
-                className="block text-[13px] sm:text-sm font-semibold text-neutral-900 mb-1.5 tracking-tight"
+                className="block text-[10px] font-semibold text-neutral-600 uppercase tracking-[0.06em] mb-1"
               >
                 Contact Number
               </label>
@@ -332,7 +329,7 @@ const Register = () => {
                 placeholder="+91 98765 43210"
                 aria-invalid={errors.contact ? "true" : "false"}
                 aria-describedby={errors.contact ? "contact-error" : undefined}
-                className={`w-full rounded-xl border bg-white px-3.5 py-2.5 sm:py-3 text-sm sm:text-[15px] text-neutral-900 placeholder:text-neutral-400 font-normal transition-all duration-200 outline-none shadow-2xs ${errors.contact
+                className={`w-full h-8 sm:h-8.5 rounded-md border bg-white px-2.5 text-xs text-neutral-900 placeholder:text-neutral-400 placeholder:text-[11px] font-normal transition-all duration-200 outline-none ${errors.contact
                   ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                   : "border-neutral-300 hover:border-neutral-400 focus:border-black focus:ring-2 focus:ring-black/10"
                   }`}
@@ -340,9 +337,9 @@ const Register = () => {
               {errors.contact && (
                 <p
                   id="contact-error"
-                  className="mt-1.5 text-xs sm:text-[13px] text-red-600 font-medium flex items-center gap-1.5"
+                  className="mt-0.5 text-[10px] text-red-600 font-medium flex items-center gap-1.5"
                 >
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-600 shrink-0" />
                   {errors.contact}
                 </p>
               )}
@@ -352,7 +349,7 @@ const Register = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-[13px] sm:text-sm font-semibold text-neutral-900 mb-1.5 tracking-tight"
+                className="block text-[10px] font-semibold text-neutral-600 uppercase tracking-[0.06em] mb-1"
               >
                 Password
               </label>
@@ -369,7 +366,7 @@ const Register = () => {
                   aria-describedby={
                     errors.password ? "password-error" : undefined
                   }
-                  className={`w-full rounded-xl border bg-white pl-3.5 pr-11 py-2.5 sm:py-3 text-sm sm:text-[15px] text-neutral-900 placeholder:text-neutral-400 font-normal transition-all duration-200 outline-none shadow-2xs ${errors.password
+                  className={`w-full h-8 sm:h-8.5 rounded-md border bg-white pl-2.5 pr-8 text-xs text-neutral-900 placeholder:text-neutral-400 placeholder:text-[11px] font-normal transition-all duration-200 outline-none ${errors.password
                     ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                     : "border-neutral-300 hover:border-neutral-400 focus:border-black focus:ring-2 focus:ring-black/10"
                     }`}
@@ -378,12 +375,12 @@ const Register = () => {
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-700 transition-colors focus:outline-none focus:text-neutral-900 cursor-pointer"
+                  className="absolute inset-y-0 right-0 flex items-center pr-2 text-neutral-400 hover:text-neutral-700 transition-colors focus:outline-none focus:text-neutral-900 cursor-pointer"
                 >
                   {showPassword ? (
                     /* Eye-off icon */
                     <svg
-                      className="w-5 h-5"
+                      className="w-3.5 h-3.5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -398,7 +395,7 @@ const Register = () => {
                   ) : (
                     /* Eye icon */
                     <svg
-                      className="w-5 h-5"
+                      className="w-3.5 h-3.5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -421,30 +418,30 @@ const Register = () => {
               {errors.password && (
                 <p
                   id="password-error"
-                  className="mt-1.5 text-xs sm:text-[13px] text-red-600 font-medium flex items-center gap-1.5"
+                  className="mt-0.5 text-[10px] text-red-600 font-medium flex items-center gap-1.5"
                 >
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-600 shrink-0" />
                   {errors.password}
                 </p>
               )}
             </div>
 
             {/* 5. Checkbox: Register as Seller */}
-            <div className="pt-1">
-              <label className="flex items-start gap-3 cursor-pointer select-none group">
+            <div className="pt-0.5">
+              <label className="flex items-start gap-2 p-2 rounded-md border border-neutral-200/90 bg-white hover:border-neutral-300 transition-colors cursor-pointer select-none group">
                 <input
                   id="isSeller"
                   name="isSeller"
                   type="checkbox"
                   checked={formData.isSeller}
                   onChange={handleChange}
-                  className="mt-0.5 h-4 w-4 sm:h-4.5 sm:w-4.5 rounded border-neutral-300 text-black accent-black focus:ring-2 focus:ring-black/20 focus:ring-offset-1 transition cursor-pointer"
+                  className="mt-0.5 h-3 w-3 rounded border-neutral-300 text-black accent-black focus:ring-2 focus:ring-black/20 focus:ring-offset-1 transition cursor-pointer"
                 />
                 <div className="flex flex-col">
-                  <span className="text-sm sm:text-[15px] font-semibold text-neutral-900 group-hover:text-black transition-colors tracking-tight">
+                  <span className="text-[10.5px] font-semibold text-neutral-900 group-hover:text-black transition-colors tracking-tight">
                     I want to register as a seller
                   </span>
-                  <span className="text-xs sm:text-[13px] text-neutral-500 mt-0.5 leading-normal font-normal">
+                  <span className="text-[9.5px] text-neutral-500 mt-0.5 leading-tight font-normal">
                     Sellers can list and manage their own products on Snitch.
                   </span>
                 </div>
@@ -455,12 +452,12 @@ const Register = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 rounded-xl bg-black hover:bg-neutral-850 active:bg-neutral-900 text-white py-3 sm:py-3.5 px-6 text-sm sm:text-[15px] font-bold tracking-[0.06em] uppercase font-['Manrope',sans-serif] transition-all duration-200 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md cursor-pointer"
+              className="w-full mt-1 h-8 sm:h-8.5 rounded-md bg-black hover:bg-neutral-800 active:bg-neutral-900 text-white px-4 text-[11px] font-bold tracking-[0.08em] uppercase font-['Manrope',sans-serif] transition-all duration-200 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs hover:shadow-sm cursor-pointer"
             >
               {isLoading ? (
                 <>
                   <svg
-                    className="w-5 h-5 animate-spin text-white"
+                    className="w-3.5 h-3.5 animate-spin text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -488,10 +485,10 @@ const Register = () => {
           </form>
 
           {/* Social Auth Separator */}
-          <div className="relative my-5 flex items-center justify-center">
+          <div className="relative my-3 flex items-center justify-center">
             <div className="w-full border-t border-neutral-200" />
-            <div className="absolute bg-[#FAFAFA] px-3">
-              <span className="text-[11px] sm:text-xs uppercase tracking-widest font-semibold text-neutral-400 font-['Manrope',sans-serif]">
+            <div className="absolute bg-[#FAFAFA] px-2.5">
+              <span className="text-[9px] uppercase tracking-widest font-semibold text-neutral-400 font-['Manrope',sans-serif]">
                 or
               </span>
             </div>
@@ -504,8 +501,8 @@ const Register = () => {
           />
 
           {/* Footer Navigation */}
-          <footer className="mt-5 sm:mt-6 space-y-2 text-center">
-            <p className="text-sm sm:text-[15px] text-neutral-600 font-normal">
+          <footer className="mt-3.5 space-y-1 text-center">
+            <p className="text-[10.5px] text-neutral-600 font-normal">
               Already have an account?{" "}
               <Link
                 to="/login"
@@ -515,7 +512,7 @@ const Register = () => {
               </Link>
             </p>
 
-            <p className="text-xs text-neutral-400 max-w-sm mx-auto leading-relaxed">
+            <p className="text-[9.5px] text-neutral-400 max-w-xs mx-auto leading-relaxed">
               By signing up, you agree to our{" "}
               <a
                 href="#terms"

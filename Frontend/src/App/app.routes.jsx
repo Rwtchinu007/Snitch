@@ -6,17 +6,10 @@ import CreateProduct from "../features/products/pages/CreateProduct";
 export const routes = createBrowserRouter([
     {
         path: "/",
+        element:<h1>Hello world</h1>
     },
     {
         path: "/seller/create-product",
-        element: <CreateProduct />
-    },
-    {
-        path: "/products/create",
-        element: <CreateProduct />
-    },
-    {
-        path: "/products/new",
         element: <CreateProduct />
     },
     {

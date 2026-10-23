@@ -308,8 +308,17 @@ const CreateProduct = () => {
                 title: "Product Published",
                 message: "Your new piece is now live on the Snitch storefront.",
             });
+            setTitle("");
+            setDescription("");
+            setPriceAmount("");
+            setImages([]);
         } catch (err) {
-            const errDetail = err?.response?.data?.message || err?.message || "Could not publish product to server.";
+            let errDetail = err?.response?.data?.message || err?.message || "Could not publish product to server.";
+            if (err?.response?.status === 401) {
+                errDetail = "You must be logged in to publish products. Please sign in first.";
+            } else if (err?.response?.status === 403) {
+                errDetail = "Seller access required. Please make sure your account is registered as a seller.";
+            }
             setToastMessage({
                 type: "error",
                 title: "Submission Error",
@@ -422,19 +431,19 @@ const CreateProduct = () => {
                     <div
                         role="status"
                         className={`mb-8 p-5 rounded-2xl border transition-all animate-fade-up flex items-start justify-between gap-4 ${toastMessage.type === "success"
-                                ? "bg-[#FFFDF9] border-[#0F3D3A]/15 text-[#0F3D3A] shadow-[0_8px_30px_-12px_rgba(15,61,58,0.15)]"
-                                : toastMessage.type === "error"
-                                    ? "bg-[#B42318]/10 border-[#B42318]/30 text-[#B42318]"
-                                    : "bg-[#FFFDF9] border-[#0F3D3A]/15 text-[#0F3D3A] shadow-[0_8px_30px_-12px_rgba(15,61,58,0.15)]"
+                            ? "bg-[#FFFDF9] border-[#0F3D3A]/15 text-[#0F3D3A] shadow-[0_8px_30px_-12px_rgba(15,61,58,0.15)]"
+                            : toastMessage.type === "error"
+                                ? "bg-[#B42318]/10 border-[#B42318]/30 text-[#B42318]"
+                                : "bg-[#FFFDF9] border-[#0F3D3A]/15 text-[#0F3D3A] shadow-[0_8px_30px_-12px_rgba(15,61,58,0.15)]"
                             }`}
                     >
                         <div className="flex items-start gap-3.5">
                             <span
                                 className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${toastMessage.type === "success"
-                                        ? "bg-[#0F3D3A] text-[#FBF4EA]"
-                                        : toastMessage.type === "error"
-                                            ? "bg-[#B42318] text-[#FBF4EA]"
-                                            : "bg-[#6C151E] text-[#FBF4EA]"
+                                    ? "bg-[#0F3D3A] text-[#FBF4EA]"
+                                    : toastMessage.type === "error"
+                                        ? "bg-[#B42318] text-[#FBF4EA]"
+                                        : "bg-[#6C151E] text-[#FBF4EA]"
                                     }`}
                             >
                                 {toastMessage.type === "success" ? "✓" : toastMessage.type === "error" ? "!" : "i"}
@@ -500,10 +509,10 @@ const CreateProduct = () => {
                                             </label>
                                             <span
                                                 className={`text-sm ${title.length > 70
-                                                        ? "text-[#B42318] font-medium"
-                                                        : title.length > 0
-                                                            ? "text-[#0F3D3A]/75"
-                                                            : "text-[#0F3D3A]/40"
+                                                    ? "text-[#B42318] font-medium"
+                                                    : title.length > 0
+                                                        ? "text-[#0F3D3A]/75"
+                                                        : "text-[#0F3D3A]/40"
                                                     }`}
                                             >
                                                 {title.length}/80
@@ -526,8 +535,8 @@ const CreateProduct = () => {
                                             aria-invalid={!!errors.title}
                                             aria-describedby={errors.title ? "title-error" : undefined}
                                             className={`w-full h-14 px-5 rounded-2xl bg-[#FBF4EA] text-base text-[#0F3D3A] placeholder-[#0F3D3A]/40 border transition-all ${errors.title
-                                                    ? "border-[#B42318] focus:ring-4 focus:ring-[#B42318]/15"
-                                                    : "border-[#0F3D3A]/15 focus:border-[#0F3D3A] focus:ring-4 focus:ring-[#0F3D3A]/10"
+                                                ? "border-[#B42318] focus:ring-4 focus:ring-[#B42318]/15"
+                                                : "border-[#0F3D3A]/15 focus:border-[#0F3D3A] focus:ring-4 focus:ring-[#0F3D3A]/10"
                                                 } focus:outline-none`}
                                         />
 
@@ -571,8 +580,8 @@ const CreateProduct = () => {
                                             aria-invalid={!!errors.description}
                                             aria-describedby={errors.description ? "desc-error" : undefined}
                                             className={`w-full px-5 py-4 rounded-2xl bg-[#FBF4EA] text-base text-[#0F3D3A] placeholder-[#0F3D3A]/40 border leading-relaxed resize-none transition-all ${errors.description
-                                                    ? "border-[#B42318] focus:ring-4 focus:ring-[#B42318]/15"
-                                                    : "border-[#0F3D3A]/15 focus:border-[#0F3D3A] focus:ring-4 focus:ring-[#0F3D3A]/10"
+                                                ? "border-[#B42318] focus:ring-4 focus:ring-[#B42318]/15"
+                                                : "border-[#0F3D3A]/15 focus:border-[#0F3D3A] focus:ring-4 focus:ring-[#0F3D3A]/10"
                                                 } focus:outline-none`}
                                         />
 
@@ -653,8 +662,8 @@ const CreateProduct = () => {
                                                     aria-invalid={!!errors.priceAmount}
                                                     aria-describedby="pricing-helper"
                                                     className={`w-full h-14 pl-12 pr-5 rounded-2xl bg-[#FBF4EA] text-base font-['Sora',sans-serif] text-[#0F3D3A] placeholder-[#0F3D3A]/40 border transition-all ${errors.priceAmount
-                                                            ? "border-[#B42318] focus:ring-4 focus:ring-[#B42318]/15"
-                                                            : "border-[#0F3D3A]/15 focus:border-[#0F3D3A] focus:ring-4 focus:ring-[#0F3D3A]/10"
+                                                        ? "border-[#B42318] focus:ring-4 focus:ring-[#B42318]/15"
+                                                        : "border-[#0F3D3A]/15 focus:border-[#0F3D3A] focus:ring-4 focus:ring-[#0F3D3A]/10"
                                                         } focus:outline-none`}
                                                 />
                                             </div>
@@ -770,8 +779,8 @@ const CreateProduct = () => {
                                             onDragLeave={handleDragLeave}
                                             onDrop={handleDrop}
                                             className={`relative flex flex-col items-center justify-center p-8 sm:p-10 rounded-2xl cursor-pointer transition-all duration-200 group ${isDraggingOver
-                                                    ? "border-2 border-solid border-[#6C151E] bg-[#F5DABF]/70 shadow-[0_0_24px_-4px_rgba(108,21,30,0.3)]"
-                                                    : "border-2 border-dashed border-[#6C151E]/40 bg-[#F5DABF]/40 hover:bg-[#F5DABF]/60 hover:border-[#6C151E]/70"
+                                                ? "border-2 border-solid border-[#6C151E] bg-[#F5DABF]/70 shadow-[0_0_24px_-4px_rgba(108,21,30,0.3)]"
+                                                : "border-2 border-dashed border-[#6C151E]/40 bg-[#F5DABF]/40 hover:bg-[#F5DABF]/60 hover:border-[#6C151E]/70"
                                                 } focus:outline-none focus:ring-4 focus:ring-[#0F3D3A]/10`}
                                         >
                                             {/* Upload Icon in a small Bordo circle with Cream icon */}
@@ -856,8 +865,8 @@ const CreateProduct = () => {
                                                             onDragOver={handleThumbDragOver}
                                                             onDrop={() => handleThumbDrop(slotIndex)}
                                                             className={`relative group rounded-2xl overflow-hidden border transition-all cursor-grab active:cursor-grabbing ${isCoverSlot
-                                                                    ? "col-span-2 row-span-2 border-[#6C151E]/30 shadow-md bg-[#F5DABF]/40"
-                                                                    : "col-span-1 row-span-1 border-[#6C151E]/15 hover:border-[#6C151E]/40 bg-[#F5DABF]/40"
+                                                                ? "col-span-2 row-span-2 border-[#6C151E]/30 shadow-md bg-[#F5DABF]/40"
+                                                                : "col-span-1 row-span-1 border-[#6C151E]/15 hover:border-[#6C151E]/40 bg-[#F5DABF]/40"
                                                                 }`}
                                                         >
                                                             {/* Image Thumbnail */}
@@ -919,8 +928,8 @@ const CreateProduct = () => {
                                                             }
                                                         }}
                                                         className={`rounded-2xl border border-dashed transition-all cursor-pointer p-4 flex flex-col items-center justify-center ${isCoverSlot
-                                                                ? "col-span-2 row-span-2 border-[#6C151E]/30 bg-[#F5DABF]/40 hover:bg-[#F5DABF]/60 text-[#0F3D3A]/70 hover:text-[#0F3D3A]"
-                                                                : "col-span-1 row-span-1 border-[#6C151E]/15 bg-[#F5DABF]/40 hover:bg-[#F5DABF]/60 hover:border-[#6C151E]/35 text-[#0F3D3A]/60 hover:text-[#0F3D3A]"
+                                                            ? "col-span-2 row-span-2 border-[#6C151E]/30 bg-[#F5DABF]/40 hover:bg-[#F5DABF]/60 text-[#0F3D3A]/70 hover:text-[#0F3D3A]"
+                                                            : "col-span-1 row-span-1 border-[#6C151E]/15 bg-[#F5DABF]/40 hover:bg-[#F5DABF]/60 hover:border-[#6C151E]/35 text-[#0F3D3A]/60 hover:text-[#0F3D3A]"
                                                             }`}
                                                     >
                                                         <span className="text-xl mb-1 text-[#6C151E]/70" aria-hidden="true">
@@ -1013,11 +1022,11 @@ const CreateProduct = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsMobilePreviewOpen(!isMobilePreviewOpen)}
-                                    className="w-full flex items-center justify-between p-5 rounded-2xl bg-[#FFFDF9] border border-[#0F3D3A]/10 text-[#0F3D3A] font-medium shadow-[0_4px_20px_-8px_rgba(15,61,58,0.1)]"
+                                    className="w-full flex items-center justify-between p-4 rounded-2xl bg-white border border-neutral-200/80 text-neutral-900 font-medium shadow-xs"
                                 >
                                     <div className="flex items-center gap-2.5">
                                         <span className="h-2.5 w-2.5 rounded-full bg-[#6C151E] animate-pulse" />
-                                        <span className="font-['Sora',sans-serif] text-base font-semibold text-[#0F3D3A]">
+                                        <span className="font-['Sora',sans-serif] text-base font-semibold text-neutral-900">
                                             Storefront Live Preview
                                         </span>
                                     </div>
@@ -1040,37 +1049,43 @@ const CreateProduct = () => {
                                             className="h-2.5 w-2.5 rounded-full bg-[#6C151E] animate-pulse"
                                             aria-hidden="true"
                                         />
-                                        <h2 className="font-['Sora',sans-serif] text-base font-semibold text-[#0F3D3A] tracking-tight">
+                                        <h2 className="font-['Sora',sans-serif] text-base font-semibold text-neutral-900 tracking-tight">
                                             Live Preview
                                         </h2>
                                     </div>
-                                    <span className="text-sm text-[#0F3D3A]/65">Snitch Storefront Card</span>
+                                    <span className="text-xs font-medium text-neutral-500">Snitch Storefront Card</span>
                                 </div>
 
-                                {/* PRODUCT CARD REPLICA: THE ONE DARK ELEMENT ON THE PAGE (#0F3D3A) */}
-                                <div className="bg-[#1F3D3A] rounded-3xl border border-[#F5DABF]/15 overflow-hidden shadow-2xl transition-all duration-300 text-[#FBF4EA]">
+                                {/* PRODUCT CARD REPLICA: CLEAN HIGH-FASHION STOREFRONT AESTHETIC */}
+                                <div className="bg-white rounded-3xl border border-neutral-200/90 overflow-hidden shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] transition-all duration-300 text-neutral-900 group/card hover:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)]">
                                     {/* Card Media Container (4:5 Aspect Ratio) */}
-                                    <div className="relative aspect-[4/5] w-full bg-[#0A2926] overflow-hidden flex items-center justify-center group">
+                                    <div className="relative aspect-[4/5] w-full bg-neutral-100 overflow-hidden flex items-center justify-center group">
                                         {images.length > 0 ? (
                                             <>
                                                 <img
                                                     src={images[previewActiveIndex]?.url || images[0].url}
                                                     alt={title || "Snitch product preview"}
-                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                                                 />
                                                 {/* Subtle Editorial Gradient Overlay */}
-                                                <div className="absolute inset-0 bg-gradient-to-t from-[#0A2926]/80 via-transparent to-transparent opacity-60 pointer-events-none" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-50 pointer-events-none" />
 
                                                 {/* Storefront Badges */}
                                                 <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-                                                    <span className="px-3 py-1 rounded-full bg-[#0F3D3A]/85 backdrop-blur-md text-[#F5DABF] text-sm font-semibold tracking-wider uppercase border border-[#F5DABF]/15">
+                                                    <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-neutral-900 text-xs font-bold tracking-wider uppercase border border-neutral-200/60 shadow-xs">
                                                         Studio Piece
+                                                    </span>
+                                                </div>
+
+                                                <div className="absolute top-4 right-4 z-10">
+                                                    <span className="bg-[#6C151E] text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-xs tracking-wider uppercase">
+                                                        New Season
                                                     </span>
                                                 </div>
 
                                                 {/* Photo switch dots if multiple photos */}
                                                 {images.length > 1 && (
-                                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10 bg-[#0F3D3A]/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#F5DABF]/15">
+                                                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
                                                         {images.map((_, dotIdx) => (
                                                             <button
                                                                 key={`dot-${dotIdx}`}
@@ -1081,8 +1096,8 @@ const CreateProduct = () => {
                                                                 }}
                                                                 aria-label={`View photo ${dotIdx + 1}`}
                                                                 className={`h-2 rounded-full transition-all ${previewActiveIndex === dotIdx
-                                                                        ? "w-5 bg-[#F5DABF]"
-                                                                        : "w-2 bg-[#F5DABF]/35 hover:bg-[#F5DABF]/70"
+                                                                    ? "w-5 bg-white"
+                                                                    : "w-2 bg-white/40 hover:bg-white/80"
                                                                     }`}
                                                             />
                                                         ))}
@@ -1091,8 +1106,8 @@ const CreateProduct = () => {
                                             </>
                                         ) : (
                                             /* Empty Studio Placeholder */
-                                            <div className="flex flex-col items-center justify-center p-8 text-center space-y-3">
-                                                <div className="h-16 w-16 rounded-2xl bg-[#F5DABF]/10 border border-[#F5DABF]/15 flex items-center justify-center text-[#F5DABF]/60 animate-pulse">
+                                            <div className="bg-gradient-to-b from-neutral-50 via-neutral-100/60 to-neutral-100 w-full h-full flex flex-col items-center justify-center p-8 text-center space-y-3">
+                                                <div className="h-16 w-16 rounded-2xl bg-white border border-neutral-200/90 shadow-xs flex items-center justify-center text-neutral-400 group-hover/card:scale-105 transition-transform duration-300">
                                                     <svg
                                                         className="h-8 w-8"
                                                         fill="none"
@@ -1107,11 +1122,11 @@ const CreateProduct = () => {
                                                         />
                                                     </svg>
                                                 </div>
-                                                <p className="font-['Sora',sans-serif] text-sm font-medium text-[#F5DABF]/80">
+                                                <p className="font-['Sora',sans-serif] text-sm font-semibold text-neutral-800">
                                                     Awaiting Studio Photography
                                                 </p>
-                                                <p className="text-sm text-[#F5DABF]/50 max-w-xs leading-relaxed">
-                                                    Upload up to 7 photos to preview your storefront lookbook.
+                                                <p className="text-xs text-neutral-400 max-w-xs leading-relaxed">
+                                                    Upload up to 7 photos to preview your storefront presentation.
                                                 </p>
                                             </div>
                                         )}
@@ -1119,15 +1134,15 @@ const CreateProduct = () => {
 
                                     {/* Thumbnail Strip (if multiple photos) */}
                                     {images.length > 1 && (
-                                        <div className="flex items-center gap-2 px-6 pt-4 overflow-x-auto pb-1">
+                                        <div className="flex items-center gap-2 px-6 pt-3.5 pb-2 overflow-x-auto bg-neutral-50/70 border-b border-neutral-100">
                                             {images.map((thumb, thumbIdx) => (
                                                 <button
                                                     key={thumb.id || thumbIdx}
                                                     type="button"
                                                     onClick={() => setPreviewActiveIndex(thumbIdx)}
                                                     className={`relative h-12 w-12 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${previewActiveIndex === thumbIdx
-                                                            ? "border-[#F5DABF] scale-105"
-                                                            : "border-[#F5DABF]/20 opacity-70 hover:opacity-100"
+                                                        ? "border-neutral-950 scale-105 shadow-xs"
+                                                        : "border-neutral-200 opacity-60 hover:opacity-100"
                                                         }`}
                                                 >
                                                     <img
@@ -1141,47 +1156,48 @@ const CreateProduct = () => {
                                     )}
 
                                     {/* Product Details Area */}
-                                    <div className="p-6 space-y-4">
-                                        {/* Brand line & New Season Tag (Bordo Pill with Cream text) */}
+                                    <div className="p-6 space-y-4 bg-white">
+                                        {/* Brand line & In Stock Pill */}
                                         <div className="flex items-center justify-between">
-                                            <span className="text-sm font-medium tracking-wider text-[#F5DABF] uppercase">
+                                            <span className="text-[11px] font-extrabold tracking-[0.2em] text-neutral-400 uppercase">
                                                 SNITCH ATELIER
                                             </span>
-                                            <span className="bg-[#6C151E] text-[#FBF4EA] text-sm font-medium px-2.5 py-0.5 rounded-full shadow-sm">
-                                                New Season
+                                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2.5 py-0.5 rounded-full">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                                                Storefront Ready
                                             </span>
                                         </div>
 
                                         {/* Product Title */}
                                         <div>
                                             {title.trim() ? (
-                                                <h3 className="font-['Sora',sans-serif] text-xl font-semibold text-[#FBF4EA] tracking-tight leading-snug break-words">
+                                                <h3 className="font-['Sora',sans-serif] text-xl font-bold text-neutral-950 tracking-tight leading-snug break-words">
                                                     {title}
                                                 </h3>
                                             ) : (
-                                                <div className="h-6 w-3/4 rounded-lg bg-[#F5DABF]/15 animate-pulse" />
+                                                <div className="h-6 w-3/4 rounded-lg bg-neutral-100 animate-pulse" />
                                             )}
                                         </div>
 
                                         {/* Clamped Description */}
                                         <div>
                                             {description.trim() ? (
-                                                <p className="text-sm text-[#F5DABF]/75 line-clamp-2 leading-relaxed break-words">
+                                                <p className="text-xs sm:text-[13px] text-neutral-500 line-clamp-2 leading-relaxed break-words">
                                                     {description}
                                                 </p>
                                             ) : (
-                                                <div className="space-y-2">
-                                                    <div className="h-4 w-full rounded bg-[#F5DABF]/15 animate-pulse" />
-                                                    <div className="h-4 w-2/3 rounded bg-[#F5DABF]/15 animate-pulse" />
+                                                <div className="space-y-1.5">
+                                                    <div className="h-3.5 w-full rounded bg-neutral-100 animate-pulse" />
+                                                    <div className="h-3.5 w-2/3 rounded bg-neutral-100 animate-pulse" />
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Storefront Size Options Preview */}
-                                        <div className="pt-2">
-                                            <div className="flex items-center justify-between text-sm text-[#F5DABF]/70 mb-2">
+                                        <div className="pt-1">
+                                            <div className="flex items-center justify-between text-xs text-neutral-500 mb-2 font-medium">
                                                 <span>Select Size</span>
-                                                <span className="text-[#F5DABF] cursor-pointer hover:underline">
+                                                <span className="text-neutral-900 font-semibold cursor-pointer hover:underline">
                                                     Size Guide
                                                 </span>
                                             </div>
@@ -1189,9 +1205,9 @@ const CreateProduct = () => {
                                                 {["S", "M", "L", "XL"].map((sz, idx) => (
                                                     <div
                                                         key={sz}
-                                                        className={`flex-1 h-9 rounded-xl text-sm font-medium flex items-center justify-center border transition-colors select-none ${idx === 1
-                                                                ? "bg-[#F5DABF] text-[#0F3D3A] font-semibold border-[#F5DABF]"
-                                                                : "border-[#F5DABF]/25 text-[#F5DABF]/80 bg-[#F5DABF]/5"
+                                                        className={`flex-1 h-9 rounded-xl text-xs font-semibold flex items-center justify-center border transition-all select-none ${idx === 1
+                                                            ? "bg-neutral-950 text-white border-neutral-950 shadow-xs"
+                                                            : "border-neutral-200 text-neutral-700 hover:border-neutral-400 bg-neutral-50/50"
                                                             }`}
                                                     >
                                                         {sz}
@@ -1200,12 +1216,12 @@ const CreateProduct = () => {
                                             </div>
                                         </div>
 
-                                        {/* Price and Storefront Pill (Price in Cream, large and semibold in Sora) */}
-                                        <div className="pt-4 border-t border-[#F5DABF]/15 flex items-center justify-between">
+                                        {/* Price and Storefront Pill */}
+                                        <div className="pt-3.5 border-t border-neutral-100 flex items-center justify-between">
                                             <div>
-                                                <span className="text-sm text-[#F5DABF]/60 block">Price</span>
+                                                <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 block">Price</span>
                                                 <div
-                                                    className={`font-['Sora',sans-serif] text-2xl font-semibold text-[#F5DABF] tracking-tight transition-opacity duration-200 ${pricePulse ? "opacity-40" : "opacity-100"
+                                                    className={`font-['Sora',sans-serif] text-2xl font-extrabold text-neutral-950 tracking-tight transition-opacity duration-200 ${pricePulse ? "opacity-40" : "opacity-100"
                                                         }`}
                                                 >
                                                     {formattedPrice() ? (
@@ -1213,19 +1229,27 @@ const CreateProduct = () => {
                                                             {currencySymbol} {formattedPrice()}
                                                         </span>
                                                     ) : (
-                                                        <span className="text-[#F5DABF]/40">{currencySymbol} 0.00</span>
+                                                        <span className="text-neutral-300">{currencySymbol} 0.00</span>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            <div className="px-5 py-2.5 rounded-xl bg-[#F5DABF]/10 border border-[#F5DABF]/15 text-sm font-medium text-[#F5DABF] select-none">
-                                                Storefront Card
+                                            <div className="px-3.5 py-1.5 rounded-xl bg-neutral-100 border border-neutral-200/80 text-xs font-semibold text-neutral-700 select-none">
+                                                Direct Listing
+                                            </div>
+                                        </div>
+
+                                        {/* Mock Storefront Add to Bag button */}
+                                        <div className="pt-1">
+                                            <div className="w-full h-11 rounded-xl bg-neutral-950 hover:bg-neutral-850 text-white font-['Sora',sans-serif] text-xs font-bold tracking-[0.1em] uppercase flex items-center justify-center gap-2 shadow-xs transition-all pointer-events-none select-none">
+                                                <span>Add to Bag</span>
+                                                <span aria-hidden="true">→</span>
                                             </div>
                                         </div>
 
                                         {/* Delivery & Care Notice */}
-                                        <p className="text-sm text-[#F5DABF]/60 leading-relaxed flex items-center gap-2 pt-1">
-                                            <span className="text-[#F5DABF]">✦</span> Complimentary luxury packaging & fast express delivery.
+                                        <p className="text-[11px] text-neutral-400 leading-relaxed flex items-center gap-1.5 pt-0.5">
+                                            <span className="text-neutral-800">✦</span> Complimentary luxury packaging & fast express delivery.
                                         </p>
                                     </div>
                                 </div>

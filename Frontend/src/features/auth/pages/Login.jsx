@@ -98,16 +98,16 @@ const Login = () => {
       {/* ========================================================================= */}
       {/* MOBILE TOP BRAND BAR (Visible only on screens < lg)                       */}
       {/* ========================================================================= */}
-      <header className="lg:hidden w-full flex items-center justify-between px-6 py-4 sm:py-5 border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-20">
+      <header className="lg:hidden w-full flex items-center justify-between px-5 py-3 border-b border-neutral-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-20">
         <Link
           to="/"
           className="inline-flex items-center gap-2 focus:outline-none"
         >
-          <span className="font-['Manrope',sans-serif] text-xl font-extrabold tracking-[0.25em] uppercase text-neutral-950">
+          <span className="font-['Manrope',sans-serif] text-sm font-extrabold tracking-[0.2em] uppercase text-neutral-950">
             SNITCH
           </span>
         </Link>
-        <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.16em] uppercase text-neutral-500 bg-neutral-100 border border-neutral-200 px-3 py-1 rounded-full">
+        <span className="text-[9px] font-bold tracking-[0.14em] uppercase text-neutral-500 bg-neutral-100 border border-neutral-200 px-2 py-0.5 rounded-full">
           Sign In
         </span>
       </header>
@@ -135,31 +135,31 @@ const Login = () => {
         </div>
 
         {/* Content Overlays */}
-        <div className="relative z-10 w-full h-full flex flex-col justify-between p-8 lg:p-12 pointer-events-auto">
+        <div className="relative z-10 w-full h-full flex flex-col justify-between p-8 lg:p-10 pointer-events-auto">
           {/* Top Header / Wordmark */}
           <div className="flex items-center justify-between">
             <Link
               to="/"
               className="group/brand inline-flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded"
             >
-              <span className="font-['Manrope',sans-serif] text-2xl sm:text-3xl tracking-[0.3em] font-extrabold uppercase text-white drop-shadow-sm transition-opacity group-hover/brand:opacity-90">
+              <span className="font-['Manrope',sans-serif] text-base sm:text-lg tracking-[0.25em] font-extrabold uppercase text-white drop-shadow-sm transition-opacity group-hover/brand:opacity-90">
                 SNITCH
               </span>
             </Link>
-            <span className="text-[11px] font-medium tracking-[0.2em] uppercase text-neutral-300 border border-white/20 px-3 py-1 rounded-full backdrop-blur-sm bg-white/5">
+            <span className="text-[9px] font-semibold tracking-[0.16em] uppercase text-neutral-300 border border-white/20 px-2 py-0.5 rounded-full backdrop-blur-sm bg-white/5">
               Member Access
             </span>
           </div>
 
           {/* Bottom Tagline & Brand Narrative */}
-          <div className="max-w-lg">
-            <p className="text-xs tracking-[0.25em] uppercase font-semibold text-neutral-300 mb-2">
+          <div className="max-w-sm">
+            <p className="text-[9px] tracking-[0.22em] uppercase font-semibold text-neutral-300/80 mb-1">
               Signature Aesthetics
             </p>
-            <h2 className="font-['Manrope',sans-serif] text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
+            <h2 className="font-['Manrope',sans-serif] text-lg sm:text-xl lg:text-[22px] font-bold tracking-tight text-white leading-snug">
               Welcome Back.
             </h2>
-            <p className="text-sm sm:text-base text-neutral-300 mt-2 font-normal leading-relaxed">
+            <p className="text-[11px] sm:text-xs text-neutral-300/80 mt-1 font-normal leading-relaxed max-w-xs">
               Sign in to access your wardrobe, track past orders, and explore the newest drops.
             </p>
           </div>
@@ -169,20 +169,20 @@ const Login = () => {
       {/* ========================================================================= */}
       {/* RIGHT LOGIN FORM PANEL                                                    */}
       {/* ========================================================================= */}
-      <main className="w-full lg:w-1/2 min-h-[calc(100vh-65px)] lg:min-h-screen lg:h-screen lg:overflow-y-auto flex flex-col justify-center items-center px-6 py-8 sm:px-10 lg:px-12 xl:px-16 bg-[#FAFAFA]">
-        <div className="w-full max-w-md lg:max-w-[430px] my-auto py-2">
+      <main className="w-full lg:w-1/2 min-h-[calc(100vh-65px)] lg:min-h-screen lg:h-screen lg:overflow-y-auto flex flex-col justify-center items-center px-6 py-6 sm:px-10 lg:px-12 bg-[#FAFAFA]">
+        <div className="w-full max-w-[310px] sm:max-w-[325px] my-auto py-2">
           {/* Header Group */}
-          <header className="mb-6 sm:mb-7">
-            <div className="inline-flex items-center gap-2 mb-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-neutral-900" />
-              <span className="text-xs font-bold tracking-[0.2em] uppercase text-neutral-500 font-['Manrope',sans-serif]">
+          <header className="mb-3.5">
+            <div className="inline-flex items-center gap-1.5 mb-1">
+              <span className="h-1 w-1 rounded-full bg-neutral-900" />
+              <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-neutral-400 font-['Manrope',sans-serif]">
                 Welcome Back
               </span>
             </div>
-            <h1 className="font-['Manrope',sans-serif] text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-[-0.03em] text-neutral-950 leading-[1.15]">
+            <h1 className="font-['Manrope',sans-serif] text-lg sm:text-xl font-bold tracking-tight text-neutral-950 leading-tight">
               Sign In
             </h1>
-            <p className="text-sm sm:text-[15px] text-neutral-600 mt-1.5 leading-relaxed font-normal">
+            <p className="text-[11px] text-neutral-500 mt-0.5 leading-normal font-normal">
               Enter your credentials to continue shopping your favourite fits.
             </p>
           </header>
@@ -191,10 +191,10 @@ const Login = () => {
           {apiError && (
             <div
               role="alert"
-              className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-start gap-3 transition-all animate-fadeIn"
+              className="mb-3.5 p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 flex items-start gap-2 transition-all animate-fadeIn"
             >
               <svg
-                className="w-5 h-5 text-red-500 mt-0.5 shrink-0"
+                className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -206,9 +206,9 @@ const Login = () => {
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 />
               </svg>
-              <div className="text-sm">
+              <div className="text-[11px]">
                 <p className="font-semibold text-red-800">Authentication Error</p>
-                <p className="text-red-700 mt-0.5 text-xs sm:text-sm leading-relaxed">
+                <p className="text-red-700 mt-0.5 leading-relaxed">
                   {apiError}
                 </p>
               </div>
@@ -219,10 +219,10 @@ const Login = () => {
           {isSuccess && (
             <div
               role="alert"
-              className="mb-5 p-3.5 rounded-xl bg-neutral-900 text-white flex items-start gap-3 transition-all animate-fadeIn"
+              className="mb-3.5 p-2.5 rounded-lg bg-neutral-900 text-white flex items-start gap-2 transition-all animate-fadeIn"
             >
               <svg
-                className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0"
+                className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -234,9 +234,9 @@ const Login = () => {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <div className="text-sm">
+              <div className="text-[11px]">
                 <p className="font-semibold text-white">Signed in successfully!</p>
-                <p className="text-neutral-300 mt-0.5 text-xs sm:text-sm leading-relaxed">
+                <p className="text-neutral-300 mt-0.5 leading-relaxed">
                   Redirecting to your dashboard...
                 </p>
               </div>
@@ -247,13 +247,13 @@ const Login = () => {
           <form
             onSubmit={handleSubmit}
             noValidate
-            className="space-y-4"
+            className="space-y-3"
           >
             {/* 1. Email Address */}
             <div>
               <label
                 htmlFor="email"
-                className="block text-[13px] sm:text-sm font-semibold text-neutral-900 mb-1.5 tracking-tight"
+                className="block text-[10px] font-semibold text-neutral-600 uppercase tracking-[0.06em] mb-1"
               >
                 Email Address
               </label>
@@ -267,7 +267,7 @@ const Login = () => {
                 placeholder="alex@snitch.co"
                 aria-invalid={errors.email ? "true" : "false"}
                 aria-describedby={errors.email ? "email-error" : undefined}
-                className={`w-full rounded-xl border bg-white px-3.5 py-2.5 sm:py-3 text-sm sm:text-[15px] text-neutral-900 placeholder:text-neutral-400 font-normal transition-all duration-200 outline-none shadow-2xs ${
+                className={`w-full h-8 sm:h-8.5 rounded-md border bg-white px-2.5 text-xs text-neutral-900 placeholder:text-neutral-400 placeholder:text-[11px] font-normal transition-all duration-200 outline-none ${
                   errors.email
                     ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                     : "border-neutral-300 hover:border-neutral-400 focus:border-black focus:ring-2 focus:ring-black/10"
@@ -276,9 +276,9 @@ const Login = () => {
               {errors.email && (
                 <p
                   id="email-error"
-                  className="mt-1.5 text-xs sm:text-[13px] text-red-600 font-medium flex items-center gap-1.5"
+                  className="mt-1 text-[10px] text-red-600 font-medium flex items-center gap-1.5"
                 >
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-600 shrink-0" />
                   {errors.email}
                 </p>
               )}
@@ -286,16 +286,16 @@ const Login = () => {
 
             {/* 2. Password with Toggle Icon */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-1">
                 <label
                   htmlFor="password"
-                  className="block text-[13px] sm:text-sm font-semibold text-neutral-900 tracking-tight"
+                  className="block text-[10px] font-semibold text-neutral-600 uppercase tracking-[0.06em]"
                 >
                   Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs text-neutral-500 hover:text-black font-medium transition-colors underline-offset-2 hover:underline"
+                  className="text-[10px] text-neutral-400 hover:text-black font-medium transition-colors underline-offset-2 hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -313,7 +313,7 @@ const Login = () => {
                   aria-describedby={
                     errors.password ? "password-error" : undefined
                   }
-                  className={`w-full rounded-xl border bg-white pl-3.5 pr-11 py-2.5 sm:py-3 text-sm sm:text-[15px] text-neutral-900 placeholder:text-neutral-400 font-normal transition-all duration-200 outline-none shadow-2xs ${
+                  className={`w-full h-8 sm:h-8.5 rounded-md border bg-white pl-2.5 pr-8 text-xs text-neutral-900 placeholder:text-neutral-400 placeholder:text-[11px] font-normal transition-all duration-200 outline-none ${
                     errors.password
                       ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                       : "border-neutral-300 hover:border-neutral-400 focus:border-black focus:ring-2 focus:ring-black/10"
@@ -323,12 +323,12 @@ const Login = () => {
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-700 transition-colors focus:outline-none focus:text-neutral-900 cursor-pointer"
+                  className="absolute inset-y-0 right-0 flex items-center pr-2 text-neutral-400 hover:text-neutral-700 transition-colors focus:outline-none focus:text-neutral-900 cursor-pointer"
                 >
                   {showPassword ? (
                     /* Eye-off icon */
                     <svg
-                      className="w-5 h-5"
+                      className="w-3.5 h-3.5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -343,7 +343,7 @@ const Login = () => {
                   ) : (
                     /* Eye icon */
                     <svg
-                      className="w-5 h-5"
+                      className="w-3.5 h-3.5"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -366,9 +366,9 @@ const Login = () => {
               {errors.password && (
                 <p
                   id="password-error"
-                  className="mt-1.5 text-xs sm:text-[13px] text-red-600 font-medium flex items-center gap-1.5"
+                  className="mt-1 text-[10px] text-red-600 font-medium flex items-center gap-1.5"
                 >
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-600 shrink-0" />
                   {errors.password}
                 </p>
               )}
@@ -376,16 +376,16 @@ const Login = () => {
 
             {/* Remember Me */}
             <div className="pt-0.5">
-              <label className="flex items-center gap-2.5 cursor-pointer select-none group">
+              <label className="flex items-center gap-2 cursor-pointer select-none group">
                 <input
                   id="rememberMe"
                   name="rememberMe"
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleChange}
-                  className="h-4 w-4 rounded border-neutral-300 text-black accent-black focus:ring-2 focus:ring-black/20 focus:ring-offset-1 transition cursor-pointer"
+                  className="h-3 w-3 rounded border-neutral-300 text-black accent-black focus:ring-2 focus:ring-black/20 focus:ring-offset-1 transition cursor-pointer"
                 />
-                <span className="text-sm font-medium text-neutral-700 group-hover:text-black transition-colors">
+                <span className="text-[10.5px] font-medium text-neutral-600 group-hover:text-black transition-colors">
                   Remember me on this device
                 </span>
               </label>
@@ -395,12 +395,12 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-3 rounded-xl bg-black hover:bg-neutral-850 active:bg-neutral-900 text-white py-3 sm:py-3.5 px-6 text-sm sm:text-[15px] font-bold tracking-[0.06em] uppercase font-['Manrope',sans-serif] transition-all duration-200 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md cursor-pointer"
+              className="w-full mt-1 h-8 sm:h-8.5 rounded-md bg-black hover:bg-neutral-800 active:bg-neutral-900 text-white px-4 text-[11px] font-bold tracking-[0.08em] uppercase font-['Manrope',sans-serif] transition-all duration-200 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs hover:shadow-sm cursor-pointer"
             >
               {isLoading ? (
                 <>
                   <svg
-                    className="w-5 h-5 animate-spin text-white"
+                    className="w-3.5 h-3.5 animate-spin text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -428,10 +428,10 @@ const Login = () => {
           </form>
 
           {/* Social Auth Separator */}
-          <div className="relative my-5 flex items-center justify-center">
+          <div className="relative my-3 flex items-center justify-center">
             <div className="w-full border-t border-neutral-200" />
-            <div className="absolute bg-[#FAFAFA] px-3">
-              <span className="text-[11px] sm:text-xs uppercase tracking-widest font-semibold text-neutral-400 font-['Manrope',sans-serif]">
+            <div className="absolute bg-[#FAFAFA] px-2.5">
+              <span className="text-[9px] uppercase tracking-widest font-semibold text-neutral-400 font-['Manrope',sans-serif]">
                 or
               </span>
             </div>
@@ -444,8 +444,8 @@ const Login = () => {
           />
 
           {/* Footer Navigation */}
-          <footer className="mt-6 sm:mt-7 space-y-3 text-center">
-            <p className="text-sm sm:text-[15px] text-neutral-600 font-normal">
+          <footer className="mt-3.5 space-y-1.5 text-center">
+            <p className="text-[10.5px] sm:text-[11px] text-neutral-600 font-normal">
               Don&apos;t have an account?{" "}
               <Link
                 to="/register"
@@ -455,7 +455,7 @@ const Login = () => {
               </Link>
             </p>
 
-            <p className="text-xs text-neutral-400 max-w-sm mx-auto leading-relaxed">
+            <p className="text-[9.5px] text-neutral-400 max-w-xs mx-auto leading-relaxed">
               By signing in, you agree to our{" "}
               <a
                 href="#terms"

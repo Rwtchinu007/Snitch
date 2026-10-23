@@ -1,6 +1,6 @@
 import React from "react";
 
-export const GoogleIcon = ({ className = "w-5 h-5 shrink-0" }) => (
+export const GoogleIcon = ({ className = "w-3.5 h-3.5 shrink-0" }) => (
   <svg
     className={className}
     viewBox="0 0 24 24"
@@ -36,7 +36,7 @@ const GoogleButton = ({
   const isDark = variant === "dark";
 
   const baseStyles =
-    "w-full rounded-xl py-3 sm:py-3.5 px-6 text-sm sm:text-[15px] font-semibold font-['Manrope',sans-serif] transition-all duration-200 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 flex items-center justify-center gap-3 cursor-pointer select-none no-underline";
+    "w-full rounded-md h-8 sm:h-8.5 px-3 text-[11px] font-semibold font-['Manrope',sans-serif] transition-all duration-200 active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 flex items-center justify-center gap-2 cursor-pointer select-none no-underline";
 
   const themeStyles = isDark
     ? "bg-neutral-900 hover:bg-neutral-850 active:bg-black text-white border border-neutral-800 shadow-xs hover:shadow-sm focus-visible:ring-black"
