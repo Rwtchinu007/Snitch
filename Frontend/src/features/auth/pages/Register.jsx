@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hook/useAuth";
 import GoogleButton from "../components/GoogleButton";
@@ -87,14 +87,15 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      await handleRegister({
+      const user = await handleRegister({
         email: formData.email,
         contact: formData.contact,
         password: formData.password,
         fullname: formData.fullName,
         isSeller: formData.isSeller,
       });
-      navigate("/")
+      const destination = user?.role === "seller" ? "/seller/dashboard" : "/";
+      navigate(destination, { replace: true });
       // Simulate network latency / dispatch
       await new Promise((resolve) => setTimeout(resolve, 1200));
       setIsSuccess(true);

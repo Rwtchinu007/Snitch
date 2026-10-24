@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hook/useAuth";
 import GoogleButton from "../components/GoogleButton";
@@ -72,16 +72,19 @@ const Login = () => {
     setApiError("");
 
     try {
-      await handleLogin({
+      const user = await handleLogin({
         email: formData.email,
         password: formData.password,
       });
-      setIsSuccess(true);
-      navigate("/");
+      if (user?.role === "seller") {
+        navigate("/seller/dashboard", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     } catch (err) {
       console.error("Login failed:", err);
       setApiError(
-        err.response?.data?.message || "Invalid credentials. Please try again."
+        err.response?.data?.message || "Invalid credentials. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -160,7 +163,8 @@ const Login = () => {
               Welcome Back.
             </h2>
             <p className="text-[11px] sm:text-xs text-neutral-300/80 mt-1 font-normal leading-relaxed max-w-xs">
-              Sign in to access your wardrobe, track past orders, and explore the newest drops.
+              Sign in to access your wardrobe, track past orders, and explore
+              the newest drops.
             </p>
           </div>
         </div>
@@ -207,7 +211,9 @@ const Login = () => {
                 />
               </svg>
               <div className="text-[11px]">
-                <p className="font-semibold text-red-800">Authentication Error</p>
+                <p className="font-semibold text-red-800">
+                  Authentication Error
+                </p>
                 <p className="text-red-700 mt-0.5 leading-relaxed">
                   {apiError}
                 </p>
@@ -235,7 +241,9 @@ const Login = () => {
                 />
               </svg>
               <div className="text-[11px]">
-                <p className="font-semibold text-white">Signed in successfully!</p>
+                <p className="font-semibold text-white">
+                  Signed in successfully!
+                </p>
                 <p className="text-neutral-300 mt-0.5 leading-relaxed">
                   Redirecting to your dashboard...
                 </p>
@@ -244,11 +252,7 @@ const Login = () => {
           )}
 
           {/* Form */}
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            className="space-y-3"
-          >
+          <form onSubmit={handleSubmit} noValidate className="space-y-3">
             {/* 1. Email Address */}
             <div>
               <label
@@ -438,10 +442,7 @@ const Login = () => {
           </div>
 
           {/* Google Auth Button */}
-          <GoogleButton
-            text="Continue with Google"
-            href="/api/auth/google"
-          />
+          <GoogleButton text="Continue with Google" href="/api/auth/google" />
 
           {/* Footer Navigation */}
           <footer className="mt-3.5 space-y-1.5 text-center">
