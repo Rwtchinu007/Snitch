@@ -15,8 +15,6 @@ const Protected = ({ children, role = "buyer" }) => {
   const userRole = user?.role?.trim().toLowerCase();
   const requiredRole = String(role).trim().toLowerCase();
 
-  console.log("[Protected] user:", user, "| userRole:", userRole, "| requiredRole:", requiredRole, "| loading:", loading);
-
   if (userRole !== requiredRole) {
     // Redirect sellers trying to access buyer routes to their dashboard
     if (userRole === "seller") return <Navigate to="/seller/dashboard" replace />;

@@ -100,7 +100,8 @@ const token = jwt.sign(
 res.cookie("token", token);
 
 
-res.redirect("http://localhost:5173/"); // Redirect to your desired route after successful authentication
+const redirectPath = user.role === "seller" ? "/seller/dashboard" : "/";
+res.redirect(`http://localhost:5173${redirectPath}`);
 }
 
 export const getMe = async (req,res)=>{
