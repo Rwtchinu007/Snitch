@@ -4,40 +4,83 @@ import Login from "../features/auth/pages/Login";
 import CreateProduct from "../features/products/pages/CreateProduct";
 import Dashboard from "../features/products/pages/Dashboard";
 import Protected from "../features/auth/components/Protected";
+import GuestOnly from "../features/auth/components/GuestOnly";
 import Home from "../features/products/pages/Home";
+import ProductDetails from "../features/products/pages/ProductDetails";
+import SellerProductDetails from "../features/products/pages/SellerProductDetails";
+import RootLayout from "./RootLayout";
+import NotFound from "./NotFound";
 
 export const routes = createBrowserRouter([
   {
-    path: "/",
-    element: <Home />,
-  },
-  {
-    path: "/seller",
+    element: <RootLayout />,
+    errorElement: <NotFound />,
     children: [
       {
-        path: "create-product",
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/seller",
+        children: [
+          {
+            path: "create-product",
+            element: (
+              <Protected role="seller">
+                <CreateProduct />
+              </Protected>
+            ),
+          },
+          {
+            path: "edit-product/:productId",
+            element: (
+              <Protected role="seller">
+                <CreateProduct />
+              </Protected>
+            ),
+          },
+          {
+            path: "dashboard",
+            element: (
+              <Protected role="seller">
+                <Dashboard />
+              </Protected>
+            ),
+          },
+          {
+            path: "/seller/product/:productId",
+            element: (
+              <Protected role="seller">
+                <SellerProductDetails/>
+              </Protected>
+            ),
+          }
+        ],
+      },
+      {
+        path: "/register",
         element: (
-          <Protected role="seller">
-            <CreateProduct />
-          </Protected>
+          <GuestOnly>
+            <Register />
+          </GuestOnly>
         ),
       },
       {
-        path: "dashboard",
+        path: "/login",
         element: (
-          <Protected role="seller">
-            <Dashboard />
-          </Protected>
+          <GuestOnly>
+            <Login />
+          </GuestOnly>
         ),
       },
+      {
+        path: "/product/:productId",
+        element:<ProductDetails />
+      },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
     ],
-  },
-  {
-    path: "/register",
-    element: <Register />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
   },
 ]);

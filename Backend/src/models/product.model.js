@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: true,
+    default: "",
   },
   seller: {
     type: mongoose.Schema.Types.ObjectId,
@@ -22,17 +22,47 @@ const productSchema = new mongoose.Schema({
     },
     currency: {
       type: String,
-      enum: ["USD", "EUR", "GBP", "JPY","INR", "CAD", "AUD"],
+      enum: ["USD", "EUR", "GBP", "JPY", "INR", "CAD", "AUD"],
       default: "INR",
     },
   },
   images: [
     {
-      url: { 
+      url: {
         type: String,
         required: true,
       },
-     
+    },
+  ],
+  variants: [
+    {
+      images: [
+        {
+          url: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
+      stock: {
+        type: Number,
+        default: 0,
+      },
+      attributes: {
+        type: Map,
+        of: String,
+      },
+      price: {
+        amount: {
+          type: Number,
+          required: true,
+        },
+        currency: {
+          type: String,
+          enum: ["USD", "EUR", "GBP", "JPY", "INR", "CAD", "AUD"],
+          default: "INR",
+        },
+      },
     },
   ],
 });

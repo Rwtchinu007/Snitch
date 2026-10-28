@@ -7,6 +7,7 @@ import productRouter from "./routes/product.routes.js";
 import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
 import { config } from "./config/config.js";
+import multer from "multer";
 
 const app = express();
 
@@ -38,5 +39,27 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
+
+// Unknown API routes
+app.use("/api", (req, res) => {
+  res.status(404).json({ message: "Route not found", success: false });
+});
+
+// Central error handler — always respond with JSON
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    const message =
+      err.code === "LIMIT_FILE_SIZE" ? "Each image must be 5MB or smaller"
+      : err.code === "LIMIT_UNEXPECTED_FILE" ? "Up to 7 images allowed"
+      : err.message;
+    return res.status(400).json({ message, success: false });
+  }
+  if (err.name === "ValidationError" || err.name === "CastError") {
+    return res.status(400).json({ message: err.message, success: false });
+  }
+  console.error(err);
+  res.status(err.status || 500).json({ message: "Something went wrong. Please try again.", success: false });
+});
 
 export default app;

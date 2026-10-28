@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../hook/useAuth";
 import GoogleButton from "../components/GoogleButton";
 
 const Login = () => {
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -76,7 +77,10 @@ const Login = () => {
         email: formData.email,
         password: formData.password,
       });
-      if (user?.role === "seller") {
+      const from = location.state?.from?.pathname;
+      if (from) {
+        navigate(from, { replace: true });
+      } else if (user?.role === "seller") {
         navigate("/seller/dashboard", { replace: true });
       } else {
         navigate("/", { replace: true });
@@ -297,12 +301,12 @@ const Login = () => {
                 >
                   Password
                 </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-[10px] text-neutral-400 hover:text-black font-medium transition-colors underline-offset-2 hover:underline"
+                <span
+                  title="Password reset is coming soon"
+                  className="text-[10px] text-neutral-400 font-medium cursor-not-allowed"
                 >
                   Forgot password?
-                </Link>
+                </span>
               </div>
               <div className="relative">
                 <input

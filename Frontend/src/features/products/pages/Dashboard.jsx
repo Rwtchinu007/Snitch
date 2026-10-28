@@ -1,425 +1,503 @@
-import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router";
-import { useProduct } from "../hook/useProduct";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { useSelector } from "react-redux";
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
-import StatCard from "../components/StatCard";
-import ProductCard from "../components/ProductCard";
-import ProductCardSkeleton from "../components/ProductCardSkeleton";
+import { useProduct } from "../hook/useProduct";
+import { useAuth } from "../../auth/hook/useAuth";
+import { getErrorMessage } from "../../../App/api.client";
 
-/* ─── Mock data (shown when API returns nothing / while offline) ─── */
-const MOCK_PRODUCTS = [
-  {
-    _id: "mock001",
-    title: "Oversized Tshirts",
-    description: "300 GSM, oversized fit, pure cotton. Breathable and durable for everyday wear.",
-    price: { amount: 1200.04, currency: "INR" },
-    images: [
-      { url: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500&q=80", _id: "i1" },
-      { url: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500&q=80", _id: "i2" },
-      { url: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500&q=80", _id: "i3" },
-    ],
-    seller: "6acf262f1ebe358370a76f85",
-  },
-  {
-    _id: "mock002",
-    title: "Slim Fit Chinos",
-    description: "Mid-rise slim fit chinos in stretch cotton twill. Perfect for smart-casual looks.",
-    price: { amount: 1849.00, currency: "INR" },
-    images: [
-      { url: "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500&q=80", _id: "i4" },
-      { url: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=500&q=80", _id: "i5" },
-    ],
-    seller: "6acf262f1ebe358370a76f85",
-  },
-  {
-    _id: "mock003",
-    title: "Relaxed Linen Shirt",
-    description: "100% linen, breathable and light. Relaxed boxy cut, perfect for summer.",
-    price: { amount: 2199.99, currency: "INR" },
-    images: [
-      { url: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=500&q=80", _id: "i6" },
-      { url: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=500&q=80", _id: "i7" },
-      { url: "https://images.unsplash.com/photo-1598032895397-b9472444bf93?w=500&q=80", _id: "i8" },
-    ],
-    seller: "6acf262f1ebe358370a76f85",
-  },
-  {
-    _id: "mock004",
-    title: "Cargo Joggers",
-    description: "Multi-pocket cargo joggers in heavy French terry. Street-ready and comfortable.",
-    price: { amount: 1599.50, currency: "INR" },
-    images: [
-      { url: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500&q=80", _id: "i9" },
-    ],
-    seller: "6acf262f1ebe358370a76f85",
-  },
-  {
-    _id: "mock005",
-    title: "Washed Denim Jacket",
-    description: "Classic washed denim jacket with a vintage look. Slightly oversized, soft interior.",
-    price: { amount: 3299.00, currency: "INR" },
-    images: [
-      { url: "https://images.unsplash.com/photo-1555689502-c4b22d76c56f?w=500&q=80", _id: "i10" },
-      { url: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&q=80", _id: "i11" },
-    ],
-    seller: "6acf262f1ebe358370a76f85",
-  },
-  {
-    _id: "mock006",
-    title: "Acid Wash Hoodie",
-    description: "Premium 400 GSM acid wash hoodie with kangaroo pocket. Unisex fit.",
-    price: { amount: 2450.00, currency: "INR" },
-    images: [
-      { url: "https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=500&q=80", _id: "i12" },
-      { url: "https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=500&q=80", _id: "i13" },
-      { url: "https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=500&q=80", _id: "i14" },
-    ],
-    seller: "6acf262f1ebe358370a76f85",
-  },
-  {
-    _id: "mock007",
-    title: "Graphic Print Tee",
-    description: "240 GSM drop-shoulder tee with a bold screen-printed graphic on the front.",
-    price: { amount: 899.00, currency: "INR" },
-    images: [
-      { url: "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=500&q=80", _id: "i15" },
-      { url: "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=500&q=80", _id: "i16" },
-    ],
-    seller: "6acf262f1ebe358370a76f85",
-  },
-  {
-    _id: "mock008",
-    title: "Corduroy Overshirt",
-    description: "Wide-wale corduroy overshirt in a relaxed fit. Can be worn as a shirt or jacket.",
-    price: { amount: 2799.00, currency: "INR" },
-    images: [
-      { url: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=500&q=80", _id: "i17" },
-      { url: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?w=500&q=80", _id: "i18" },
-      { url: "https://images.unsplash.com/photo-1589310243389-96a5483213a8?w=500&q=80", _id: "i19" },
-    ],
-    seller: "6acf262f1ebe358370a76f85",
-  },
+const SORTS = [
+  { value: "newest", label: "Newest" },
+  { value: "asc", label: "Price low → high" },
+  { value: "desc", label: "Price high → low" },
 ];
 
-/* ─── Icon components ─────────────────────────────────────────────── */
-const IconBox = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-    <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375z" />
-    <path fillRule="evenodd" d="M3.087 9l.54 9.176A3 3 0 006.62 21h10.757a3 3 0 002.995-2.824L20.913 9H3.087zm6.163 3.75A.75.75 0 0110 12h4a.75.75 0 010 1.5h-4a.75.75 0 01-.75-.75z" clipRule="evenodd" />
-  </svg>
-);
-const IconRupee = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-    <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.902 7.098a3.75 3.75 0 013.903-.884.75.75 0 10.498-1.415A5.25 5.25 0 0010.5 9h-.75A.75.75 0 009 9.75v.75H8.25a.75.75 0 000 1.5H9v.75a.75.75 0 00.75.75h.75a3.75 3.75 0 013.75 3.75v.093c0 .476-.066.95-.196 1.41A.75.75 0 0015 18v1.5a.75.75 0 001.5 0V18a.75.75 0 00-.75-.75c-.084 0-.165.005-.245.017A5.25 5.25 0 009 12.75H8.25a.75.75 0 000 1.5H9v-.75A.75.75 0 009.75 12.75h.15a5.25 5.25 0 012.35.55.75.75 0 00.65-1.35 6.75 6.75 0 00-2.802-.652h-.35V12h.25c.34 0 .676-.034 1.002-.1a.75.75 0 10-.287-1.47 3.74 3.74 0 01-.715.07H9.75v-.75h.348a.75.75 0 000-1.5H9.75V8.25a.75.75 0 00-1.5 0V9.75H7.5a.75.75 0 000 1.5h.75V12H7.5a.75.75 0 000 1.5h1.098z" clipRule="evenodd" />
-  </svg>
-);
-const IconTag = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-    <path fillRule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.121-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clipRule="evenodd" />
-  </svg>
-);
-const IconSpark = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-    <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5z" clipRule="evenodd" />
-  </svg>
-);
+const formatPrice = (amount, currency = "INR", decimals = 2) =>
+  new Intl.NumberFormat("en-IN", { style: "currency", currency, minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(amount || 0);
 
-/* ─── Dashboard ───────────────────────────────────────────────────── */
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const { handleGetSellerProducts } = useProduct();
-  const sellerProducts = useSelector((state) => state.products.sellerProducts);
+// Mongo ObjectIds encode their creation time in the first 4 bytes
+const createdAt = (p) => {
+  if (p.createdAt) return new Date(p.createdAt);
+  const ts = parseInt(String(p._id).slice(0, 8), 16);
+  return Number.isFinite(ts) && String(p._id).length === 24 ? new Date(ts * 1000) : null;
+};
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState("default");
-  const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'list'
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+/* ─── Icons ──────────────────────────────────────────────────────────── */
+export const Icon = ({ d, className = "w-5 h-5" }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>
+);
+// eslint-disable-next-line react-refresh/only-export-components
+export const I = {
+  overview: <><rect x="4" y="4" width="7" height="7" rx="1" /><rect x="13" y="4" width="7" height="7" rx="1" /><rect x="4" y="13" width="7" height="7" rx="1" /><rect x="13" y="13" width="7" height="7" rx="1" /></>,
+  products: <><path d="M5 8h14l-1 12H6L5 8Z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></>,
+  add: <><circle cx="12" cy="12" r="8" /><path d="M12 8v8M8 12h8" /></>,
+  orders: <><path d="M6 4h12v16l-3-2-3 2-3-2-3 2V4Z" /><path d="M9 9h6M9 13h4" /></>,
+  analytics: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
+  settings: <><circle cx="12" cy="12" r="3" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" /></>,
+  logout: <><path d="M15 4h4v16h-4" /><path d="M10 8l-4 4 4 4M6 12h10" /></>,
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  close: <path d="M6 6l12 12M18 6 6 18" />,
+  search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
+  edit: <><path d="M4 20h4L19 9l-4-4L4 16v4Z" /><path d="m13.5 6.5 4 4" /></>,
+  trash: <><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></>,
+  grid: <><rect x="4" y="4" width="7" height="7" /><rect x="13" y="4" width="7" height="7" /><rect x="4" y="13" width="7" height="7" /><rect x="13" y="13" width="7" height="7" /></>,
+  list: <path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  chevron: <path d="m6 9 6 6 6-6" />,
+  hanger: <><path d="M12 7a2 2 0 1 1 2-2" /><path d="M12 7v2L3 16h18l-9-7" /></>,
+};
 
-  /* Fetch products */
+/* ─── Hooks ──────────────────────────────────────────────────────────── */
+const useInView = () => {
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        await handleGetSellerProducts();
-      } catch {
-        // API failed — mock data will be used below
-      } finally {
-        // Simulate skeleton for a beat even if fast
-        setTimeout(() => setLoading(false), 900);
-      }
-    };
-    load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); io.disconnect(); }
+    }, { threshold: 0.1 });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
+  return [ref, visible];
+};
 
-  /* Use real data if available, fallback to mock */
-  const baseProducts = sellerProducts?.length > 0 ? sellerProducts : MOCK_PRODUCTS;
+const useCountUp = (target, run, duration = 900) => {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (!run) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf;
+    const start = performance.now() - (reduced ? duration : 0);
+    const tick = (now) => {
+      const t = Math.min((now - start) / duration, 1);
+      setValue(target * (1 - Math.pow(1 - t, 3)));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, run, duration]);
+  return value;
+};
 
-  /* Search + sort */
-  const displayProducts = useMemo(() => {
-    let list = [...baseProducts];
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.title?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q)
-      );
-    }
-    if (sortBy === "price-asc") list.sort((a, b) => (a.price?.amount || 0) - (b.price?.amount || 0));
-    if (sortBy === "price-desc") list.sort((a, b) => (b.price?.amount || 0) - (a.price?.amount || 0));
-    if (sortBy === "name") list.sort((a, b) => a.title?.localeCompare(b.title || "") || 0);
-    return list;
-  }, [baseProducts, search, sortBy]);
+/* ─── Sidebar ────────────────────────────────────────────────────────── */
+const NAV = [
+  { key: "overview", label: "Overview", to: "/seller/dashboard" },
+  { key: "products", label: "Products", to: "/seller/dashboard#products" },
+  { key: "add", label: "Add Product", to: "/seller/create-product" },
+  { key: "orders", label: "Orders" },
+  { key: "analytics", label: "Analytics" },
+  { key: "settings", label: "Settings" },
+];
+const NAV_ITEM_H = 44;
 
-  /* Stats */
-  const totalInventoryValue = baseProducts.reduce((sum, p) => sum + (p.price?.amount || 0), 0);
-  const avgPrice = baseProducts.length ? totalInventoryValue / baseProducts.length : 0;
-  const recentAdditions = baseProducts.slice(-3).length;
+export const SidebarContent = ({ active, setActive, user, onNavigate }) => {
+  const navigate = useNavigate();
+  const { handleLogout } = useAuth();
+  const activeIndex = NAV.findIndex((n) => n.key === active);
+  const name = user?.fullname || user?.name || "Seller";
 
   return (
-    <div className="min-h-screen flex" style={{ background: "linear-gradient(160deg, #F2FDFF 0%, #EDE9FF22 100%)" }}>
-      {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <div className="h-full flex flex-col">
+      <Link to="/" className="px-6 h-16 flex items-center font-manrope font-extrabold text-xl tracking-[0.35em] text-[#131610]">SNITCH</Link>
+      <p className="px-6 mt-6 mb-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-[#131610]/40">Studio</p>
+      <nav className="relative px-3">
+        <span
+          className="absolute left-3 right-3 rounded-lg bg-[#D4CFC8]/35 transition-transform duration-300 ease-out"
+          style={{ height: NAV_ITEM_H, transform: `translateY(${activeIndex * NAV_ITEM_H}px)` }}
+        >
+          <span className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-full bg-[#104292]" />
+        </span>
+        {NAV.map((n) => {
+          const isActive = n.key === active;
+          return (
+            <button
+              key={n.key}
+              onClick={() => {
+                setActive(n.key);
+                if (n.to) navigate(n.to);
+                if (n.key === "products") document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                onNavigate?.();
+              }}
+              style={{ height: NAV_ITEM_H }}
+              className={`relative w-full flex items-center gap-3 px-4 rounded-lg text-[13px] font-manrope font-semibold tracking-tight transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#104292] ${isActive ? "text-[#104292]" : "text-[#131610]/65 hover:text-[#131610]"}`}
+            >
+              <Icon d={I[n.key]} className="w-[18px] h-[18px]" />
+              {n.label}
+              {!n.to && <span className="ml-auto text-[9px] font-inter font-semibold uppercase tracking-widest text-[#131610]/30">Soon</span>}
+            </button>
+          );
+        })}
+      </nav>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
-        {/* Topbar */}
-        <Topbar onMenuClick={() => setSidebarOpen(true)} />
-
-        {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 space-y-6 max-w-screen-2xl mx-auto w-full">
-
-          {/* ── Welcome Header ─────────────────────────────────────── */}
-          <section
-            className="relative overflow-hidden rounded-2xl p-6 sm:p-8 gradient-primary animate-fade-slide-up shadow-lg shadow-[#7BBBFF]/30"
-            style={{ animationDelay: "0ms" }}
-          >
-            {/* Decorative blobs */}
-            <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-8 right-24 w-32 h-32 rounded-full bg-[#B8A9FF]/30 blur-2xl pointer-events-none" />
-
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <p className="text-white/70 font-inter text-sm mb-1">Good morning ☀️</p>
-                <h1 className="font-clash font-semibold text-2xl sm:text-3xl text-white leading-tight">
-                  Welcome back, Kshiitiz
-                </h1>
-                <p className="text-white/65 font-inter text-sm mt-1.5">
-                  Your store is performing well. Here's your overview for today.
-                </p>
-              </div>
-              <button
-                onClick={() => navigate("/seller/create-product")}
-                className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-inter font-semibold text-sm border border-white/25 backdrop-blur-sm transition-all duration-200 hover:shadow-lg active:scale-95"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                  <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                </svg>
-                Add Product
-              </button>
-            </div>
-          </section>
-
-          {/* ── Stats Row ──────────────────────────────────────────── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              icon={<IconBox />}
-              label="Total Products"
-              value={baseProducts.length}
-              trend="+12%"
-              trendUp
-              delay={100}
-            />
-            <StatCard
-              icon={<IconRupee />}
-              label="Inventory Value"
-              prefix="₹"
-              value={totalInventoryValue}
-              trend="+8%"
-              trendUp
-              delay={200}
-            />
-            <StatCard
-              icon={<IconTag />}
-              label="Average Price"
-              prefix="₹"
-              value={avgPrice}
-              delay={300}
-            />
-            <StatCard
-              icon={<IconSpark />}
-              label="Recent Additions"
-              value={recentAdditions}
-              trend="This week"
-              trendUp
-              delay={400}
-            />
+      <div className="mt-auto p-4 border-t border-black/10">
+        <div className="flex items-center gap-3">
+          <span className="w-10 h-10 shrink-0 rounded-full bg-[#131610] text-white grid place-items-center font-manrope font-bold uppercase">{name.charAt(0)}</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-manrope font-bold truncate">{name}</p>
+            <p className="text-[11px] text-[#131610]/50 truncate">{user?.email || "Seller account"}</p>
           </div>
+          <button aria-label="Log out" onClick={async () => { await handleLogout(); navigate("/login", { replace: true }); }} className="btn-press w-11 h-11 grid place-items-center rounded-lg text-[#131610]/60 hover:text-[#131610] hover:bg-[#D4CFC8]/30 transition-colors">
+            <Icon d={I.logout} className="w-[18px] h-[18px]" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-          {/* ── Products Section ───────────────────────────────────── */}
-          <section
-            className="animate-fade-slide-up"
-            style={{ animationDelay: "200ms", animationFillMode: "both" }}
-          >
-            {/* Section header */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
-              <div className="flex-1">
-                <h2 className="font-clash font-semibold text-xl text-[#050F2A]">Your Products</h2>
-                <p className="text-xs text-[#050F2A]/45 font-inter mt-0.5 uppercase tracking-[0.08em]">
-                  {displayProducts.length} item{displayProducts.length !== 1 ? "s" : ""}
-                </p>
-              </div>
+/* ─── Stat card ──────────────────────────────────────────────────────── */
+const StatCard = ({ label, value, format, note, accent, index, run }) => {
+  const animated = useCountUp(typeof value === "number" ? value : 0, run);
+  return (
+    <div
+      style={{ animationDelay: `${120 + index * 80}ms` }}
+      className="animate-rise bg-white rounded-xl border border-black/10 border-t-2 border-t-[#131610] shadow-[0_1px_2px_rgba(19,22,16,0.04)] p-5 sm:p-6"
+    >
+      <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-[#131610]/50">{label}</p>
+      <p className={`mt-3 font-manrope font-bold text-2xl sm:text-3xl tracking-tight tabular-nums truncate ${accent ? "text-[#104292]" : "text-[#131610]"}`}>
+        {typeof value === "number" ? format(animated) : value}
+      </p>
+      <p className="mt-1.5 text-xs text-[#131610]/45 truncate">{note}</p>
+    </div>
+  );
+};
 
-              {/* Controls */}
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* Search */}
-                <div className="relative">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#050F2A]/30 pointer-events-none">
-                    <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
-                  </svg>
-                  <input
-                    type="search"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search..."
-                    className="pl-8 pr-3 py-2 text-xs font-inter rounded-xl border border-[#050F2A]/10 bg-white text-[#050F2A] placeholder-[#050F2A]/30
-                      focus:outline-none focus:ring-2 focus:ring-[#7BBBFF]/40 focus:border-[#7BBBFF]/40 transition-all w-40"
-                  />
-                </div>
+/* ─── Product card (grid) ────────────────────────────────────────────── */
+const SellerCard = ({ product, index, onEdit, onDelete }) => {
+  const [ref, visible] = useInView();
+  const [hovered, setHovered] = useState(false);
+  const images = product.images?.length ? product.images : [{ url: "" }];
+  const hasSecond = images.length > 1;
 
-                {/* Sort */}
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-2 text-xs font-inter rounded-xl border border-[#050F2A]/10 bg-white text-[#050F2A]
-                    focus:outline-none focus:ring-2 focus:ring-[#7BBBFF]/40 transition-all cursor-pointer"
-                >
-                  <option value="default">Sort: Default</option>
-                  <option value="name">Name A–Z</option>
-                  <option value="price-asc">Price: Low → High</option>
-                  <option value="price-desc">Price: High → Low</option>
-                </select>
+  return (
+    <article
+      ref={ref}
+      style={{ transitionDelay: `${(index % 4) * 70}ms` }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`group h-full flex flex-col bg-white rounded-xl border border-black/10 shadow-[0_1px_2px_rgba(19,22,16,0.04)] overflow-hidden transition-all duration-500 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+    >
+      <div className="relative aspect-[4/5] overflow-hidden bg-[#D4CFC8]">
+        <img src={images[0].url || undefined} alt={product.title} loading="lazy"
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${hasSecond ? (hovered ? "opacity-0" : "opacity-100") : "group-hover:scale-[1.04]"}`} />
+        {hasSecond && (
+          <img src={images[1].url} alt="" loading="lazy"
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${hovered ? "opacity-100 scale-[1.04]" : "opacity-0"}`} />
+        )}
 
-                {/* View toggle */}
-                <div className="flex items-center bg-white border border-[#050F2A]/10 rounded-xl p-1 gap-1">
-                  <button
-                    onClick={() => setViewMode("grid")}
-                    className={`p-1.5 rounded-lg transition-all duration-200 ${viewMode === "grid" ? "bg-[#7BBBFF] text-white shadow-sm" : "text-[#050F2A]/40 hover:text-[#050F2A]"}`}
-                    aria-label="Grid view"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
-                      <path d="M1 2.5A1.5 1.5 0 012.5 1h3A1.5 1.5 0 017 2.5v3A1.5 1.5 0 015.5 7h-3A1.5 1.5 0 011 5.5v-3zM9 2.5A1.5 1.5 0 0110.5 1h3A1.5 1.5 0 0115 2.5v3A1.5 1.5 0 0113.5 7h-3A1.5 1.5 0 019 5.5v-3zM1 10.5A1.5 1.5 0 012.5 9h3A1.5 1.5 0 017 10.5v3A1.5 1.5 0 015.5 15h-3A1.5 1.5 0 011 13.5v-3zM9 10.5A1.5 1.5 0 0110.5 9h3a1.5 1.5 0 011.5 1.5v3a1.5 1.5 0 01-1.5 1.5h-3A1.5 1.5 0 019 13.5v-3z" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setViewMode("list")}
-                    className={`p-1.5 rounded-lg transition-all duration-200 ${viewMode === "list" ? "bg-[#7BBBFF] text-white shadow-sm" : "text-[#050F2A]/40 hover:text-[#050F2A]"}`}
-                    aria-label="List view"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
-                      <path fillRule="evenodd" d="M2 4.75A.75.75 0 012.75 4h10.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 3.5A.75.75 0 012.75 7.5h10.5a.75.75 0 010 1.5H2.75A.75.75 0 012 8.25zm0 3.5a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
+        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full border border-white/60 bg-white/85 backdrop-blur-sm text-[10px] font-semibold uppercase tracking-widest text-[#131610]">
+          {product.images?.length || 0} {product.images?.length === 1 ? "Photo" : "Photos"}
+        </span>
 
-            {/* Grid / Skeleton / Empty */}
-            {loading ? (
-              <div className={`grid gap-4 ${viewMode === "grid"
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                : "grid-cols-1"}`}>
-                {Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
-              </div>
-            ) : displayProducts.length === 0 ? (
-              /* Empty state */
-              <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-slide-up">
-                <div className="w-20 h-20 rounded-2xl gradient-primary/20 flex items-center justify-center mb-5 border border-[#7BBBFF]/20">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    strokeWidth={1.5} className="w-10 h-10 text-[#7BBBFF]">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-.375c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v.375c0 .621.504 1.125 1.125 1.125z" />
-                  </svg>
-                </div>
-                <h3 className="font-clash font-semibold text-xl text-[#050F2A] mb-2">
-                  {search ? "No products found" : "No products yet"}
-                </h3>
-                <p className="text-sm text-[#050F2A]/45 font-inter mb-6 max-w-sm">
-                  {search
-                    ? `We couldn't find anything matching "${search}". Try a different search.`
-                    : "Start building your Snitch store by adding your first product."}
-                </p>
-                {!search && (
-                  <button
-                    onClick={() => navigate("/seller/create-product")}
-                    className="gradient-primary-btn flex items-center gap-2 px-6 py-3 rounded-xl text-white font-inter font-semibold text-sm shadow-md transition-all duration-300"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                      <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                    </svg>
-                    Add Your First Product
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className={`grid gap-4 ${viewMode === "grid"
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
-                {displayProducts.map((product, i) => (
-                  <ProductCard
-                    key={product._id}
-                    product={product}
-                    delay={i * 60}
-                    onEdit={(p) => navigate(`/seller/edit-product/${p._id}`)}
-                    onDelete={(p) => setDeleteConfirm(p)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        </main>
+        <div className="absolute top-2 right-2 flex gap-1 lg:opacity-0 lg:translate-y-1 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 lg:focus-within:opacity-100 transition-all duration-200 ease-out">
+          {[
+            { label: "Edit", icon: I.edit, fn: onEdit },
+            { label: "Delete", icon: I.trash, fn: onDelete },
+          ].map((a) => (
+            <button key={a.label} onClick={() => a.fn(product)} aria-label={`${a.label} ${product.title}`} className="btn-press w-11 h-11 grid place-items-center">
+              <span className="w-9 h-9 rounded-full bg-white shadow-sm grid place-items-center text-[#131610] hover:text-[#104292] transition-colors">
+                <Icon d={a.icon} className="w-4 h-4" />
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {hasSecond && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {images.slice(0, 5).map((im, i) => (
+              <span key={im._id || i} className={`h-1.5 rounded-full transition-all duration-300 ${(hovered ? 1 : 0) === i ? "w-4 bg-white" : "w-1.5 bg-white/60"}`} />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Delete Confirm Modal */}
-      {deleteConfirm && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#050F2A]/50 backdrop-blur-sm animate-overlay-fade"
-          onClick={() => setDeleteConfirm(null)}
-        >
-          <div
-            className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fade-slide-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-rose-500">
-                <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 013.878.512.75.75 0 11-.256 1.478l-.209-.035-1.005 13.07a3 3 0 01-2.991 2.77H8.084a3 3 0 01-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 01-.256-1.478A48.567 48.567 0 017.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 013.369 0c1.603.051 2.815 1.387 2.815 2.951zm-6.136-1.452a51.196 51.196 0 013.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 00-6 0v-.113c0-.794.609-1.428 1.364-1.452zm-.355 5.945a.75.75 0 10-1.5.058l.347 9a.75.75 0 101.499-.058l-.346-9zm5.48.058a.75.75 0 10-1.498-.058l-.347 9a.75.75 0 001.5.058l.345-9z" clipRule="evenodd" />
-              </svg>
+      <div className="flex flex-col flex-1 p-4">
+        <h3 className="font-manrope font-semibold text-[15px] text-[#131610] truncate"><Link to={`/product/${product._id}`} className="title-underline">{product.title}</Link></h3>
+        <p className="mt-1 text-[13px] leading-relaxed text-[#131610]/55 line-clamp-2 min-h-[2.6em]">{product.description}</p>
+        <div className="mt-auto pt-4">
+          <div className="pt-3 border-t border-black/10 flex items-center justify-between">
+            <span className="text-sm font-semibold tabular-nums text-[#131610]">{formatPrice(product.price?.amount, product.price?.currency)}</span>
+            <StatusChip />
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+};
+
+const StatusChip = () => (
+  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#C288A2]/40 text-[10px] font-semibold uppercase tracking-widest text-[#C288A2]">
+    <span className="w-1.5 h-1.5 rounded-full bg-[#C288A2]" /> Live
+  </span>
+);
+
+/* ─── Product table (list) ───────────────────────────────────────────── */
+const ProductTable = ({ products, onEdit, onDelete }) => (
+  <div className="animate-rise bg-white rounded-xl border border-black/10 shadow-[0_1px_2px_rgba(19,22,16,0.04)] overflow-x-auto">
+    <table className="w-full text-left min-w-[640px]">
+      <thead className="sticky top-0 bg-white">
+        <tr className="border-b border-black/10">
+          {["Product", "Description", "Price", "Images", "Status", ""].map((h, i) => (
+            <th key={i} className={`px-5 py-4 text-[10px] font-semibold uppercase tracking-widest text-[#131610]/50 ${h === "Price" ? "text-right" : ""}`}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-black/10">
+        {products.map((p) => (
+          <tr key={p._id} className="group hover:bg-[#FAFAFA] transition-colors">
+            <td className="px-5 py-3">
+              <div className="flex items-center gap-3">
+                <img src={p.images?.[0]?.url} alt="" className="w-12 h-[60px] rounded-md object-cover bg-[#D4CFC8] shrink-0" />
+                <span className="font-manrope font-semibold text-sm text-[#131610] truncate max-w-[180px]"><Link to={`/product/${p._id}`} className="title-underline">{p.title}</Link></span>
+              </div>
+            </td>
+            <td className="px-5 py-3 text-[13px] text-[#131610]/55 max-w-[280px]"><span className="line-clamp-2">{p.description}</span></td>
+            <td className="px-5 py-3 text-sm font-semibold tabular-nums text-right whitespace-nowrap">{formatPrice(p.price?.amount, p.price?.currency)}</td>
+            <td className="px-5 py-3 text-sm tabular-nums text-[#131610]/70">{p.images?.length || 0}</td>
+            <td className="px-5 py-3"><StatusChip /></td>
+            <td className="px-3 py-3">
+              <div className="flex justify-end">
+                <button onClick={() => onEdit(p)} aria-label={`Edit ${p.title}`} className="btn-press w-11 h-11 grid place-items-center rounded-lg text-[#131610]/60 hover:text-[#104292] transition-colors"><Icon d={I.edit} className="w-4 h-4" /></button>
+                <button onClick={() => onDelete(p)} aria-label={`Delete ${p.title}`} className="btn-press w-11 h-11 grid place-items-center rounded-lg text-[#131610]/60 hover:text-[#131610] transition-colors"><Icon d={I.trash} className="w-4 h-4" /></button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+const SkeletonCard = () => (
+  <div className="bg-white rounded-xl border border-black/10 overflow-hidden">
+    <div className="aspect-[4/5] shimmer" />
+    <div className="p-4">
+      <div className="h-4 w-3/4 rounded shimmer" />
+      <div className="h-3 w-full mt-2 rounded shimmer" />
+      <div className="h-3 w-2/3 mt-1.5 rounded shimmer" />
+      <div className="h-px bg-black/10 mt-4" />
+      <div className="h-4 w-1/3 mt-3 rounded shimmer" />
+    </div>
+  </div>
+);
+
+/* ─── Dashboard ──────────────────────────────────────────────────────── */
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const { handleGetSellerProducts, handleDeleteProduct } = useProduct();
+  const sellerProducts = useSelector((state) => state.products.sellerProducts);
+  const user = useSelector((state) => state.auth?.user);
+
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [drawer, setDrawer] = useState(false);
+  const [activeNav, setActiveNav] = useState("overview");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("newest");
+  const [view, setView] = useState("grid");
+  const [toDelete, setToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  useEffect(() => {
+    handleGetSellerProducts()
+      .catch((err) => setLoadError(getErrorMessage(err, "Couldn't load your products.")))
+      .finally(() => setLoading(false));
+  }, [handleGetSellerProducts]);
+
+  useEffect(() => {
+    document.body.style.overflow = drawer || toDelete ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [drawer, toDelete]);
+
+  useEffect(() => {
+    if (!toDelete) return;
+    const onKey = (e) => e.key === "Escape" && !deleting && setToDelete(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [toDelete, deleting]);
+
+  // The API returns newest first
+  const products = useMemo(() => sellerProducts || [], [sellerProducts]);
+
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let list = products.filter((p) => !q || `${p.title} ${p.description}`.toLowerCase().includes(q));
+    if (sort === "asc") list = [...list].sort((a, b) => (a.price?.amount || 0) - (b.price?.amount || 0));
+    else if (sort === "desc") list = [...list].sort((a, b) => (b.price?.amount || 0) - (a.price?.amount || 0));
+    return list;
+  }, [products, search, sort]);
+
+  const totalValue = products.reduce((s, p) => s + (p.price?.amount || 0), 0);
+  const avgPrice = products.length ? totalValue / products.length : 0;
+  const latest = products[0];
+  const latestDate = latest && createdAt(latest);
+
+  const firstName = (user?.fullname || user?.name || "").split(" ")[0];
+  const goAdd = () => navigate("/seller/create-product");
+
+  const closeDelete = () => {
+    if (deleting) return;
+    setToDelete(null);
+    setDeleteError("");
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await handleDeleteProduct(toDelete._id);
+      setToDelete(null);
+    } catch (err) {
+      setDeleteError(getErrorMessage(err, "Couldn't delete this piece. Please try again."));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FAFAFA] text-[#131610] font-inter overflow-x-hidden">
+      <style>{DASHBOARD_STYLES}</style>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:block fixed inset-y-0 left-0 w-60 bg-white border-r border-black/10 z-30">
+        <SidebarContent active={activeNav} setActive={setActiveNav} user={user} />
+      </aside>
+
+      {/* Mobile top bar */}
+      <header className="lg:hidden sticky top-0 z-30 h-16 px-4 flex items-center justify-between bg-white/85 backdrop-blur-md border-b border-black/10">
+        <button onClick={() => setDrawer(true)} aria-label="Open menu" className="btn-press w-11 h-11 -ml-2 grid place-items-center"><Icon d={I.menu} /></button>
+        <span className="font-manrope font-extrabold text-lg tracking-[0.35em]">SNITCH</span>
+        <button onClick={goAdd} aria-label="Add product" className="btn-press w-11 h-11 -mr-2 grid place-items-center"><Icon d={I.plus} /></button>
+      </header>
+
+      {/* Mobile drawer */}
+      <div className={`lg:hidden fixed inset-0 z-50 ${drawer ? "" : "pointer-events-none"}`}>
+        <div onClick={() => setDrawer(false)} className={`absolute inset-0 bg-[#131610]/40 transition-opacity duration-300 ${drawer ? "opacity-100" : "opacity-0"}`} />
+        <aside className={`absolute inset-y-0 left-0 w-[80%] max-w-[280px] bg-white transition-transform duration-300 ease-out ${drawer ? "translate-x-0" : "-translate-x-full"}`}>
+          <button onClick={() => setDrawer(false)} aria-label="Close menu" className="absolute top-2.5 right-2 w-11 h-11 grid place-items-center z-10"><Icon d={I.close} /></button>
+          <SidebarContent active={activeNav} setActive={setActiveNav} user={user} onNavigate={() => setDrawer(false)} />
+        </aside>
+      </div>
+
+      <main className="lg:pl-60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10 lg:py-14">
+          {/* Header */}
+          <section className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="animate-rise text-[11px] font-semibold uppercase tracking-[0.3em] text-[#131610]/50 inline-flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#131610]" /> Seller Studio
+              </p>
+              <h1 className="animate-rise [animation-delay:60ms] mt-3 font-cormorant font-light text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight">
+                {firstName ? `Welcome back, ${firstName}` : "Your Collection"}
+              </h1>
+              <p className="animate-rise [animation-delay:120ms] mt-3 text-[15px] text-[#131610]/55">Manage your pieces, pricing and imagery in one place.</p>
             </div>
-            <h3 className="font-clash font-semibold text-lg text-[#050F2A] mb-1">Delete Product?</h3>
-            <p className="text-sm text-[#050F2A]/55 font-inter mb-5">
-              Are you sure you want to delete <span className="font-semibold text-[#050F2A]">{deleteConfirm.title}</span>? This action cannot be undone.
+            <button onClick={goAdd} className="animate-rise [animation-delay:180ms] btn-press w-full md:w-auto h-12 px-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#131610] text-white text-[12px] font-semibold uppercase tracking-widest hover:bg-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#104292] focus-visible:ring-offset-2">
+              <Icon d={I.plus} className="w-4 h-4" /> Add Product
+            </button>
+          </section>
+
+          {/* Stats */}
+          <section className="mt-10 lg:mt-12 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-[124px] sm:h-[136px] rounded-xl shimmer" />)
+            ) : (
+              <>
+                <StatCard index={0} run label="Total Products" value={products.length} format={(v) => Math.round(v)} note="Pieces listed" />
+                <StatCard index={1} run accent label="Inventory Value" value={totalValue} format={(v) => formatPrice(v, "INR", 0)} note="Sum of listed prices" />
+                <StatCard index={2} run label="Average Price" value={avgPrice} format={(v) => formatPrice(v, "INR", 0)} note="Per piece" />
+                <StatCard index={3} label="Latest Upload"
+                  value={latestDate ? latestDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "—"}
+                  note={latest?.title || "Nothing yet"} />
+              </>
+            )}
+          </section>
+
+          {/* Products */}
+          <section id="products" className="mt-12 lg:mt-16 scroll-mt-20">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between pb-5 border-b border-black/10">
+              <div className="flex items-baseline gap-3">
+                <h2 className="font-manrope font-bold text-2xl tracking-tight">Products</h2>
+                <span className="text-[12px] font-semibold uppercase tracking-widest text-[#131610]/45 tabular-nums">{loading ? "—" : visible.length}</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <label className="relative flex-1 min-w-[180px] sm:flex-none">
+                  <Icon d={I.search} className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#131610]/40 pointer-events-none" />
+                  <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search pieces…" aria-label="Search products"
+                    className="w-full sm:w-60 h-11 pl-9 pr-3 rounded-lg border border-black/10 bg-white text-sm outline-none placeholder:text-[#131610]/40 focus:border-[#104292] focus:ring-2 focus:ring-[#104292]/20 transition" />
+                </label>
+                <div className="relative">
+                  <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort products"
+                    className="appearance-none h-11 pl-4 pr-9 rounded-lg border border-black/10 bg-white text-[12px] font-medium uppercase tracking-widest outline-none cursor-pointer focus:ring-2 focus:ring-[#104292]/20 focus:border-[#104292]">
+                    {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </select>
+                  <Icon d={I.chevron} className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#131610]/50" />
+                </div>
+                <div className="flex h-11 p-1 rounded-lg border border-black/10 bg-white" role="group" aria-label="View mode">
+                  {["grid", "list"].map((v) => (
+                    <button key={v} onClick={() => setView(v)} aria-pressed={view === v} aria-label={`${v} view`}
+                      className={`w-10 grid place-items-center rounded-md transition-colors duration-200 ${view === v ? "bg-[#131610] text-white" : "text-[#131610]/50 hover:text-[#131610]"}`}>
+                      <Icon d={I[v]} className="w-4 h-4" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-8">
+              {loading ? (
+                <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10">
+                  {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+                </div>
+              ) : loadError ? (
+                <div className="flex flex-col items-center text-center py-20 bg-white rounded-xl border border-dashed border-[#D4CFC8]">
+                  <h3 className="font-manrope font-bold text-2xl tracking-tight">Couldn't load your pieces</h3>
+                  <p className="mt-2 max-w-sm text-sm text-[#131610]/55">{loadError}</p>
+                  <button onClick={() => window.location.reload()} className="btn-press mt-8 h-12 px-8 rounded-lg border border-black/15 bg-white text-[12px] font-semibold uppercase tracking-widest">Try again</button>
+                </div>
+              ) : visible.length === 0 ? (
+                <div className="flex flex-col items-center text-center py-20 bg-white rounded-xl border border-dashed border-[#D4CFC8]">
+                  <Icon d={search ? I.search : I.hanger} className="w-12 h-12 text-[#D4CFC8]" />
+                  <h3 className="mt-6 font-manrope font-bold text-2xl tracking-tight">{search ? "No pieces match" : "No pieces listed yet"}</h3>
+                  <p className="mt-2 max-w-sm text-sm text-[#131610]/55">
+                    {search ? `Nothing matches “${search}”. Try a different search.` : "Your collection is a blank canvas. List your first piece to start selling on Snitch."}
+                  </p>
+                  {search ? (
+                    <button onClick={() => setSearch("")} className="btn-press mt-8 h-12 px-8 rounded-lg border border-black/15 bg-white text-[12px] font-semibold uppercase tracking-widest">Clear search</button>
+                  ) : (
+                    <button onClick={goAdd} className="btn-press mt-8 h-12 px-8 rounded-lg bg-[#131610] text-white text-[12px] font-semibold uppercase tracking-widest">Add your first product</button>
+                  )}
+                </div>
+              ) : view === "grid" ? (
+                <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10">
+                  {visible.map((p, i) => (
+                    <SellerCard key={p._id} product={p} index={i} onEdit={(x) => navigate(`/seller/edit-product/${x._id}`)} onDelete={setToDelete} />
+                  ))}
+                </div>
+              ) : (
+                <ProductTable products={visible} onEdit={(x) => navigate(`/seller/edit-product/${x._id}`)} onDelete={setToDelete} />
+              )}
+            </div>
+          </section>
+        </div>
+      </main>
+
+      {/* Delete modal */}
+      {toDelete && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+          <div onClick={closeDelete} className="absolute inset-0 bg-[#131610]/45 backdrop-blur-[2px] animate-fade" />
+          <div className="animate-rise relative w-full max-w-sm bg-white rounded-xl border border-black/10 shadow-xl p-6 sm:p-7">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#131610]/45 inline-flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C288A2]" /> Remove piece
             </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteConfirm(null)}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-[#050F2A]/12 text-sm font-inter font-medium text-[#050F2A] hover:bg-[#050F2A]/5 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  // TODO: wire to delete API
-                  setDeleteConfirm(null);
-                }}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-sm font-inter font-medium text-white transition-colors active:scale-95"
-              >
-                Delete
-              </button>
+            <h3 id="delete-title" className="mt-3 font-manrope font-bold text-xl tracking-tight">Delete “{toDelete.title}”?</h3>
+            <p className="mt-2 text-sm text-[#131610]/55 leading-relaxed">This piece will be removed from your collection and the storefront. This can’t be undone.</p>
+            {deleteError && <p role="alert" className="mt-3 text-xs text-[#B4534B]">{deleteError}</p>}
+            <div className="mt-7 flex flex-col-reverse sm:flex-row gap-3">
+              <button autoFocus onClick={closeDelete} disabled={deleting} className="btn-press flex-1 h-11 rounded-lg border border-black/15 bg-white text-[12px] font-semibold uppercase tracking-widest">Cancel</button>
+              <button onClick={confirmDelete} disabled={deleting} className="btn-press flex-1 h-11 inline-flex items-center justify-center gap-2 rounded-lg bg-[#131610] text-white text-[12px] font-semibold uppercase tracking-widest disabled:opacity-60">{deleting && <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />}{deleting ? "Deleting…" : "Delete"}</button>
             </div>
           </div>
         </div>
@@ -427,5 +505,39 @@ const Dashboard = () => {
     </div>
   );
 };
+
+const DASHBOARD_STYLES = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Manrope:wght@500;600;700;800&display=swap');
+.font-manrope { font-family: 'Manrope', 'Inter', sans-serif; }
+.font-cormorant { font-family: 'Cormorant Garamond', Georgia, serif; }
+.font-inter { font-family: 'Inter', sans-serif; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.animate-rise { opacity: 0; animation: rise .6s cubic-bezier(.16,1,.3,1) forwards; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.animate-fade { animation: fade .2s ease-out; }
+
+.btn-press { transition: transform .2s ease-out, background-color .2s ease-out, color .2s ease-out; }
+.btn-press:active { transform: scale(.96); }
+
+@keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+.shimmer {
+  background: #D4CFC8 linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,.35) 50%, rgba(255,255,255,0) 100%) no-repeat;
+  background-size: 400px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.title-underline {
+  background-image: linear-gradient(#C288A2, #C288A2);
+  background-size: 0 1px; background-position: 0 100%; background-repeat: no-repeat;
+  transition: background-size .3s ease-out; padding-bottom: 2px;
+}
+.group:hover .title-underline { background-size: 100% 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; transition-delay: 0ms !important; }
+  .animate-rise { opacity: 1; }
+}
+`;
 
 export default Dashboard;

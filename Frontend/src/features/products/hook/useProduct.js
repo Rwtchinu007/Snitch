@@ -1,26 +1,43 @@
-import { createProduct, getSellerProduct, getAllProducts } from "../services/product.api";
+import { createProduct, updateProduct, deleteProduct, getSellerProduct, getAllProducts, getProductById } from "../services/product.api";
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { setSellerProducts, setProducts } from "../state/product.slice";
+import { setSellerProducts, setProducts, removeSellerProduct } from "../state/product.slice";
 
 
 export const useProduct = () => {
     const dispatch = useDispatch();
-async function handleCreateProduct(formData) {
-    const data = await createProduct(formData);
-    return data.product;
-}
 
-async function handleGetSellerProducts() {
-    const data = await getSellerProduct();
-    dispatch(setSellerProducts(data.products));
-    return data.products;
-}
+    const handleCreateProduct = useCallback(async (formData, onUploadProgress) => {
+        const data = await createProduct(formData, onUploadProgress);
+        return data.product;
+    }, []);
 
-const handleGetAllProducts = useCallback(async () => {
-    const data = await getAllProducts();
-    dispatch(setProducts(data.products));
-    return data.products;
-}, [dispatch]);
-    return { handleCreateProduct, handleGetSellerProducts,handleGetAllProducts };
+    const handleUpdateProduct = useCallback(async (productId, formData, onUploadProgress) => {
+        const data = await updateProduct(productId, formData, onUploadProgress);
+        return data.product;
+    }, []);
+
+    const handleDeleteProduct = useCallback(async (productId) => {
+        await deleteProduct(productId);
+        dispatch(removeSellerProduct(productId));
+    }, [dispatch]);
+
+    const handleGetSellerProducts = useCallback(async () => {
+        const data = await getSellerProduct();
+        dispatch(setSellerProducts(data.products));
+        return data.products;
+    }, [dispatch]);
+
+    const handleGetProductById = useCallback(async (productId) => {
+        const data = await getProductById(productId);
+        return data.product;
+    }, []);
+
+    const handleGetAllProducts = useCallback(async () => {
+        const data = await getAllProducts();
+        dispatch(setProducts(data.products));
+        return data.products;
+    }, [dispatch]);
+
+    return { handleCreateProduct, handleUpdateProduct, handleDeleteProduct, handleGetSellerProducts, handleGetAllProducts, handleGetProductById };
 }

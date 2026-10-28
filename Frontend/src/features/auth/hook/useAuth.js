@@ -1,38 +1,49 @@
 import { setLoading, setUser } from "../state/auth.slice";
-import { register,login,getMe } from "../services/auth.api"
+import { register, login, getMe, logout } from "../services/auth.api"
+import { setSellerProducts } from "../../products/state/product.slice";
+import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 
 
 
 export const useAuth = () => {
     const dispatch = useDispatch();
-    async function handleRegister({ email, contact, password, fullname, isSeller = false }) {
+
+    const handleRegister = useCallback(async ({ email, contact, password, fullname, isSeller = false }) => {
         const data = await register({ email, contact, password, fullname, isSeller });
         dispatch(setUser(data.user))
         return data.user;
-    }
+    }, [dispatch]);
 
 
-    async function handleLogin({ email, password }) {
+    const handleLogin = useCallback(async ({ email, password }) => {
         const data = await login({ email, password });
         dispatch(setUser(data.user))
         dispatch(setLoading(false))
         return data.user;
-    }
+    }, [dispatch]);
 
-    async function handleGetMe(){
-        try{
-
+    const handleGetMe = useCallback(async () => {
+        try {
             dispatch(setLoading(true));
             const data = await getMe();
             dispatch(setUser(data.user))
-            dispatch(setLoading(false));
-        }catch(error){
-         console.error("Error fetching user:", error);
-        }finally{
+        } catch {
+            // 401 just means "not logged in"
+            dispatch(setUser(null));
+        } finally {
             dispatch(setLoading(false));
         }
-    }
+    }, [dispatch]);
 
-    return { handleRegister, handleLogin, handleGetMe }
+    const handleLogout = useCallback(async () => {
+        try {
+            await logout();
+        } finally {
+            dispatch(setUser(null));
+            dispatch(setSellerProducts([]));
+        }
+    }, [dispatch]);
+
+    return { handleRegister, handleLogin, handleGetMe, handleLogout }
 }

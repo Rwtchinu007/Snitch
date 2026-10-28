@@ -1,16 +1,19 @@
 import { useSelector } from "react-redux";
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
+import AuthLoader from "./AuthLoader";
 
 const Protected = ({ children, role = "buyer" }) => {
   const user = useSelector((state) => state.auth.user);
   const loading = useSelector((state) => state.auth.loading);
+  const location = useLocation();
   // Only block render if we have no user AND the initial auth check is still in-flight.
   // If the user is already in the store (e.g. just logged in), proceed immediately.
   if (loading && !user) {
-    return <div>Loading...</div>;
+    return <AuthLoader />;
   }
   if (!user) {
-    return <Navigate to="/login" replace />;
+    // Remember where the user was headed so login can send them back
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
   const userRole = user?.role?.trim().toLowerCase();
   const requiredRole = String(role).trim().toLowerCase();

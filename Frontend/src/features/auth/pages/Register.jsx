@@ -19,7 +19,7 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   // Generic change handler for all controlled inputs
   const handleChange = (e) => {
@@ -85,6 +85,7 @@ const Register = () => {
     }
 
     setIsLoading(true);
+    setApiError("");
 
     try {
       const user = await handleRegister({
@@ -96,11 +97,9 @@ const Register = () => {
       });
       const destination = user?.role === "seller" ? "/seller/dashboard" : "/";
       navigate(destination, { replace: true });
-      // Simulate network latency / dispatch
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      setIsSuccess(true);
     } catch (err) {
       console.error("Registration failed:", err);
+      setApiError(err.response?.data?.message || "Couldn't create your account. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -205,33 +204,13 @@ const Register = () => {
             </p>
           </header>
 
-          {/* Registration Feedback / Toast Notification */}
-          {isSuccess && (
+          {/* API Error Notification */}
+          {apiError && (
             <div
               role="alert"
-              className="mb-3.5 p-2.5 rounded-lg bg-neutral-900 text-white flex items-start gap-2 transition-all animate-fadeIn"
+              className="mb-3.5 p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[11px] font-medium transition-all animate-fadeIn"
             >
-              <svg
-                className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              <div className="text-[11px]">
-                <p className="font-semibold text-white">
-                  Account created successfully!
-                </p>
-                <p className="text-neutral-300 mt-0.5 leading-relaxed">
-                  Welcome to the Snitch community. Redirecting you to your wardrobe...
-                </p>
-              </div>
+              {apiError}
             </div>
           )}
 

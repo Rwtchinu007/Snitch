@@ -2,7 +2,14 @@ import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
 
-async function sendTokenResponse(user, res, message) {
+export const cookieOptions = {
+  httpOnly: true,
+  sameSite: "lax",
+  secure: config.NODE_ENV === "production",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
+async function sendTokenResponse(user, res, message, status = 200) {
   const token = jwt.sign(
     {
       id: user._id,
@@ -13,9 +20,9 @@ async function sendTokenResponse(user, res, message) {
     },
   );
 
-  res.cookie("token", token);
+  res.cookie("token", token, cookieOptions);
 
-  res.status(200).json({
+  res.status(status).json({
     message,
     success: true,
     user: {
@@ -45,9 +52,8 @@ export const register = async (req, res) => {
     const user = await userModel.create({ email, contact, password, fullname,role: isSeller ? "seller" : "buyer" });
 
 
-    await sendTokenResponse(user, res, "User registered successfully");
+    await sendTokenResponse(user, res, "User registered successfully", 201);
 
-    res.status(201).json({ message: "User registered successfully", user });
   } catch (error) {
     console.error("Error registering user:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -97,11 +103,11 @@ const token = jwt.sign(
   },
 );
 
-res.cookie("token", token);
+res.cookie("token", token, cookieOptions);
 
 
 const redirectPath = user.role === "seller" ? "/seller/dashboard" : "/";
-res.redirect(`http://localhost:5173${redirectPath}`);
+res.redirect(`${config.CLIENT_URL}${redirectPath}`);
 }
 
 export const getMe = async (req,res)=>{
@@ -117,4 +123,9 @@ export const getMe = async (req,res)=>{
       role: user.role,
     }
   })
+}
+export const logout = (req, res) => {
+  const { maxAge, ...clearOptions } = cookieOptions;
+  res.clearCookie("token", clearOptions);
+  res.status(200).json({ message: "Logged out successfully", success: true });
 }
