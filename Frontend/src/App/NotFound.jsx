@@ -17,7 +17,7 @@ const NotFound = () => {
         {error ? "We hit a snag loading this page. Please try again." : "The page you're looking for doesn't exist or has moved."}
       </p>
       <Link to="/" className="mt-10 h-12 px-8 inline-flex items-center rounded-lg bg-[#131610] text-white text-[12px] font-semibold uppercase tracking-widest active:scale-[0.96] transition-transform">
-        Back to shop
+        Back to home
       </Link>
     </div>
   );

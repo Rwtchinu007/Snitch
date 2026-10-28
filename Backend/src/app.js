@@ -8,6 +8,9 @@ import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
 import { config } from "./config/config.js";
 import multer from "multer";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 
 const app = express();
 
@@ -44,6 +47,17 @@ app.use("/api/products", productRouter);
 app.use("/api", (req, res) => {
   res.status(404).json({ message: "Route not found", success: false });
 });
+
+// Production: serve the built frontend and fall back to index.html so deep links
+// like /product/:id survive a refresh (API routes are handled above)
+const clientDist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../Frontend/dist");
+if (config.NODE_ENV === "production" && fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.use((req, res, next) => {
+    if (req.method !== "GET") return next();
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
 
 // Central error handler — always respond with JSON
 // eslint-disable-next-line no-unused-vars

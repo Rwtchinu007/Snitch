@@ -96,7 +96,7 @@ const CreateProduct = () => {
       .then((p) => {
         if (cancelled) return;
         if (!p) throw new Error("missing");
-        if (user && String(p.seller) !== String(user.id)) {
+        if (user && String(p.seller?._id ?? p.seller) !== String(user.id)) {
           setEditError("You can only edit your own products.");
           setEditStatus("error");
           return;

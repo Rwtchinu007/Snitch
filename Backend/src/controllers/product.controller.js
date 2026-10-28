@@ -142,7 +142,7 @@ export async function getProductDetails(req,res){
   if (!mongoose.isValidObjectId(productId)) {
     return res.status(404).json({ message: "Product not found", success: false });
   }
-  const product = await productModel.findById(productId);
+  const product = await productModel.findById(productId).populate("seller", "fullname");
   if(!product) {
     return res.status(404).json({
       message: "Product not found",

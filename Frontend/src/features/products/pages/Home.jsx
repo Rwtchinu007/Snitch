@@ -229,7 +229,7 @@ export const ProductCard = ({ product, index, wished, onWish, onAdd }) => {
       onMouseLeave={() => setHovered(false)}
     >
       <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-[#D4CFC8]">
-        <Link to={`/detail/${product._id}`} aria-label={product.title} className="absolute inset-0">
+        <Link to={`/product/${product._id}`} aria-label={product.title} className="absolute inset-0">
           <img
             src={images[0].url || undefined}
             alt={product.title}
@@ -283,7 +283,7 @@ export const ProductCard = ({ product, index, wished, onWish, onAdd }) => {
       </div>
 
       <div className="flex flex-col flex-1 pt-4">
-        <Link to={`/detail/${product._id}`} className="min-w-0">
+        <Link to={`/product/${product._id}`} className="min-w-0">
           <h3 className="font-manrope font-semibold text-[15px] text-[#131610] truncate">
             <span className="title-underline">{product.title}</span>
           </h3>
