@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../auth/hook/useAuth";
 import { getErrorMessage } from "../../../App/api.client";
+import { PATHS } from "../../../App/paths";
+import { listingOptions, swatchColor, hasPriceRange } from "../utils/variants";
 
 const CATEGORIES = ["All", "T-shirts", "Hoodies", "Pants", "Jackets"];
 const SORTS = [
@@ -152,7 +154,7 @@ export const Navbar = ({ user, cartCount, wishCount, search, setSearch }) => {
                   <div className="absolute right-0 top-full mt-2 w-48 py-2 rounded-lg bg-white border border-black/10 shadow-[0_8px_24px_-12px_rgba(19,22,16,0.25)]">
                     <p className="px-4 pb-2 mb-1 border-b border-black/10 text-xs text-[#131610]/55 truncate">{user.email}</p>
                     {user.role === "seller" && (
-                      <Link to="/seller/dashboard" className="flex items-center h-11 px-4 text-sm hover:bg-[#FAFAFA] hover:text-[#104292]">Seller dashboard</Link>
+                      <Link to={PATHS.sellerDashboard} onMouseDown={(e) => e.preventDefault()} onClick={() => setMenuOpen(false)} className="flex items-center h-11 px-4 text-sm hover:bg-[#FAFAFA] hover:text-[#104292]">Seller dashboard</Link>
                     )}
                     <button onMouseDown={(e) => e.preventDefault()} onClick={logout} className="w-full text-left flex items-center h-11 px-4 text-sm hover:bg-[#FAFAFA] hover:text-[#104292]">Log out</button>
                   </div>
@@ -200,7 +202,7 @@ export const Navbar = ({ user, cartCount, wishCount, search, setSearch }) => {
               <Link to="/login" className="btn-press flex items-center justify-center h-12 rounded-lg bg-[#131610] text-white text-sm font-semibold uppercase tracking-widest">Sign in</Link>
             )}
             {user?.role === "seller" && (
-              <Link to="/seller/dashboard" className="btn-press flex items-center justify-center h-12 rounded-lg bg-[#131610] text-white text-sm font-semibold uppercase tracking-widest">Seller dashboard</Link>
+              <Link to={PATHS.sellerDashboard} onClick={() => setDrawer(false)} className="btn-press flex items-center justify-center h-12 rounded-lg bg-[#131610] text-white text-sm font-semibold uppercase tracking-widest">Seller dashboard</Link>
             )}
             {user && (
               <button onClick={() => { setDrawer(false); logout(); }} className="btn-press flex items-center justify-center h-12 rounded-lg border border-black/15 bg-white text-sm font-semibold uppercase tracking-widest">Log out</button>
@@ -219,34 +221,44 @@ export const ProductCard = ({ product, index, wished, onWish, onAdd }) => {
   const images = product.images?.length ? product.images : [{ url: "" }];
   const hasSecond = images.length > 1;
   const isNew = index < 3;
+  const soldOut = product.inStock === false;
+  const { colors, count } = listingOptions(product);
+  const swatches = colors.slice(0, 4).map((c) => ({ name: c, css: swatchColor(c) })).filter((c) => c.css);
+  const price = hasPriceRange(product)
+    ? `From ${formatPrice({ amount: product.minPrice, currency: product.price?.currency })}`
+    : formatPrice(product.price);
+  const href = PATHS.product(product._id);
 
   return (
     <article
       ref={ref}
       style={{ transitionDelay: `${(index % 4) * 80}ms` }}
-      className={`group flex flex-col transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+      className={`group relative flex flex-col transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-[#D4CFC8]">
-        <Link to={`/product/${product._id}`} aria-label={product.title} className="absolute inset-0">
-          <img
-            src={images[0].url || undefined}
-            alt={product.title}
-            loading="lazy"
-            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out ${hasSecond ? (hovered ? "opacity-0" : "opacity-100") : "group-hover:scale-[1.04]"}`}
-          />
-          {hasSecond && (
-            <img
-              src={images[1].url}
-              alt=""
-              loading="lazy"
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out ${hovered ? "opacity-100 scale-[1.04]" : "opacity-0 scale-100"}`}
-            />
-          )}
-        </Link>
+      {/* The whole card opens the product; buttons sit above this link */}
+      <Link to={href} aria-label={product.title} className="absolute inset-0 z-[1] rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#104292] focus-visible:ring-offset-4" />
 
-        {isNew && (
+      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-[#D4CFC8]">
+        <img
+          src={images[0].url || undefined}
+          alt={product.title}
+          loading="lazy"
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out ${soldOut ? "opacity-50 grayscale-[30%]" : hasSecond ? (hovered ? "opacity-0" : "opacity-100") : "group-hover:scale-[1.04]"}`}
+        />
+        {hasSecond && !soldOut && (
+          <img
+            src={images[1].url}
+            alt=""
+            loading="lazy"
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out ${hovered ? "opacity-100 scale-[1.04]" : "opacity-0 scale-100"}`}
+          />
+        )}
+
+        {soldOut ? (
+          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 text-[#131610]/60 text-[10px] font-semibold uppercase tracking-widest">Sold out</span>
+        ) : isNew && (
           <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C288A2] text-white text-[10px] font-semibold uppercase tracking-widest">New</span>
         )}
 
@@ -254,7 +266,7 @@ export const ProductCard = ({ product, index, wished, onWish, onAdd }) => {
           onClick={() => onWish(product._id)}
           aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
           aria-pressed={wished}
-          className="btn-press absolute top-2 right-2 w-11 h-11 grid place-items-center"
+          className="btn-press absolute z-[2] top-2 right-2 w-11 h-11 grid place-items-center"
         >
           <span className="w-9 h-9 rounded-full bg-white/95 grid place-items-center shadow-sm">
             <HeartIcon
@@ -265,41 +277,48 @@ export const ProductCard = ({ product, index, wished, onWish, onAdd }) => {
           </span>
         </button>
 
-        {images.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 transition-opacity duration-300 lg:group-hover:opacity-0">
-            {images.slice(0, 4).map((im, i) => (
-              <span key={im._id || i} className={`h-1.5 rounded-full transition-all duration-300 ${(hovered ? 1 : 0) === i ? "w-4 bg-white" : "w-1.5 bg-white/60"}`} />
-            ))}
-          </div>
+        {/* Desktop quick add — products with options open the product page to choose one */}
+        {!soldOut && (
+          <button
+            onClick={() => onAdd(product)}
+            className="hidden lg:flex absolute z-[2] inset-x-3 bottom-3 h-11 items-center justify-center rounded-lg bg-[#131610] text-white text-[11px] font-semibold uppercase tracking-widest translate-y-[calc(100%+12px)] group-hover:translate-y-0 focus-visible:translate-y-0 transition-transform duration-300 ease-out active:scale-[0.98]"
+          >
+            {product.hasVariants ? "Choose options" : "Quick Add"}
+          </button>
         )}
-
-        {/* Desktop quick add */}
-        <button
-          onClick={() => onAdd(product)}
-          className="hidden lg:flex absolute inset-x-3 bottom-3 h-11 items-center justify-center rounded-lg bg-[#131610] text-white text-[11px] font-semibold uppercase tracking-widest translate-y-[calc(100%+12px)] group-hover:translate-y-0 focus-visible:translate-y-0 transition-transform duration-300 ease-out active:scale-[0.98]"
-        >
-          Quick Add
-        </button>
       </div>
 
       <div className="flex flex-col flex-1 pt-4">
-        <Link to={`/product/${product._id}`} className="min-w-0">
-          <h3 className="font-manrope font-semibold text-[15px] text-[#131610] truncate">
-            <span className="title-underline">{product.title}</span>
-          </h3>
-        </Link>
-        <p className="mt-1 text-[13px] leading-relaxed text-[#131610]/55 line-clamp-2 min-h-[2.6em]">{product.description}</p>
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-sm font-semibold tabular-nums tracking-wide text-[#131610] group-hover:text-[#104292] transition-colors duration-200">
-            {formatPrice(product.price)}
+        <h3 className="font-manrope font-semibold text-[13px] sm:text-sm text-[#131610] truncate">
+          <span className="title-underline">{product.title}</span>
+        </h3>
+        {(swatches.length > 0 || count > 1) && (
+          <div className="mt-2 flex items-center gap-1.5 h-4">
+            {swatches.length > 0 ? (
+              <>
+                {swatches.map((c) => (
+                  <span key={c.name} title={c.name} className="w-3.5 h-3.5 rounded-full border border-black/15" style={{ background: c.css }} />
+                ))}
+                {colors.length > swatches.length && <span className="text-[11px] text-[#131610]/50">+{colors.length - swatches.length}</span>}
+              </>
+            ) : (
+              <span className="text-[11px] text-[#131610]/50">{count} options</span>
+            )}
+          </div>
+        )}
+        <div className="mt-2 flex items-center justify-between">
+          <span className={`text-sm font-semibold tabular-nums tracking-wide transition-colors duration-200 ${soldOut ? "text-[#131610]/45" : "text-[#131610] group-hover:text-[#104292]"}`}>
+            {price}
           </span>
-          <button
-            onClick={() => onAdd(product)}
-            aria-label={`Add ${product.title} to cart`}
-            className="btn-press lg:hidden w-11 h-11 -mr-2 grid place-items-center"
-          >
-            <span className="w-8 h-8 rounded-full border border-black/10 bg-white grid place-items-center"><PlusIcon className="w-4 h-4" /></span>
-          </button>
+          {!soldOut && (
+            <button
+              onClick={() => onAdd(product)}
+              aria-label={product.hasVariants ? `Choose options for ${product.title}` : `Add ${product.title} to cart`}
+              className="btn-press relative z-[2] lg:hidden w-11 h-11 -mr-2 grid place-items-center"
+            >
+              <span className="w-8 h-8 rounded-full border border-black/10 bg-white grid place-items-center"><PlusIcon className="w-4 h-4" /></span>
+            </button>
+          )}
         </div>
       </div>
     </article>
@@ -308,7 +327,7 @@ export const ProductCard = ({ product, index, wished, onWish, onAdd }) => {
 
 const SkeletonCard = () => (
   <div className="flex flex-col">
-    <div className="aspect-[4/5] rounded-md shimmer" />
+    <div className="aspect-[3/4] rounded-md shimmer" />
     <div className="h-4 w-3/4 mt-4 rounded shimmer" />
     <div className="h-3 w-full mt-2 rounded shimmer" />
     <div className="h-3 w-1/3 mt-4 rounded shimmer" />
@@ -354,6 +373,7 @@ const Home = () => {
   const products = useSelector((state) => state.products.products);
   const user = useSelector((state) => state.auth?.user);
   const { handleGetAllProducts } = useProduct();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -378,8 +398,9 @@ const Home = () => {
       (category === "All" || getCategory(p) === category) &&
       (!q || `${p.title} ${p.description}`.toLowerCase().includes(q))
     );
-    if (sort === "asc") list = [...list].sort((a, b) => (a.price?.amount || 0) - (b.price?.amount || 0));
-    if (sort === "desc") list = [...list].sort((a, b) => (b.price?.amount || 0) - (a.price?.amount || 0));
+    const priceOf = (p) => p.minPrice ?? p.price?.amount ?? 0;
+    if (sort === "asc") list = [...list].sort((a, b) => priceOf(a) - priceOf(b));
+    if (sort === "desc") list = [...list].sort((a, b) => priceOf(b) - priceOf(a));
     return list;
   }, [source, category, sort, search]);
 
@@ -412,14 +433,14 @@ const Home = () => {
 
       <main id="collection" className="flex-1">
         {/* Hero */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10 md:pt-20 md:pb-14 text-center">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 text-center">
           <p className="animate-rise text-[11px] font-semibold uppercase tracking-[0.3em] text-[#131610]/50 inline-flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#131610]" /> The Collection
           </p>
-          <h1 className="animate-rise [animation-delay:80ms] mt-4 font-cormorant font-light text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-tight">
+          <h1 className="animate-rise [animation-delay:80ms] mt-3 font-cormorant font-light text-3xl md:text-4xl leading-[1.05] tracking-tight">
             Curated Archive
           </h1>
-          <p className="animate-rise [animation-delay:160ms] mt-5 mx-auto max-w-[560px] text-[15px] leading-relaxed text-[#131610]/55">
+          <p className="animate-rise [animation-delay:160ms] mt-2 mx-auto max-w-md text-sm text-[#131610]/55 truncate">
             Premium minimalist pieces, designed for effortless elegance and enduring quality.
           </p>
         </section>
@@ -464,7 +485,7 @@ const Home = () => {
         {/* Grid */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
               {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : loadError ? (
@@ -484,7 +505,7 @@ const Home = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-12">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
                 {filtered.slice(0, visibleCount).map((p, i) => (
                   <ProductCard
                     key={p._id}
@@ -492,7 +513,7 @@ const Home = () => {
                     index={i}
                     wished={wishlist.has(p._id)}
                     onWish={toggleWish}
-                    onAdd={() => setCartCount((c) => c + 1)}
+                    onAdd={(prod) => (prod.hasVariants ? navigate(PATHS.product(prod._id)) : setCartCount((c) => c + 1))}
                   />
                 ))}
               </div>

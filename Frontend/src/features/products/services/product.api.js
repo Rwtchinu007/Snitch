@@ -16,7 +16,7 @@ export async function deleteProduct(productId){
 }
 
 export async function getSellerProduct(){
-    const response = await apiClient.get("/products/seller");
+    const response = await apiClient.get("/products/seller/me");
     return response.data;
 }
 
@@ -26,6 +26,21 @@ export async function getAllProducts(){
 }
 
 export async function getProductById(productId){
-    const response = await apiClient.get(`/products/detail/${productId}`);
+    const response = await apiClient.get(`/products/${productId}`);
+    return response.data;
+}
+
+export async function createVariant(productId, formData, onUploadProgress){
+    const response = await apiClient.post(`/products/${productId}/variants`, formData, { onUploadProgress });
+    return response.data;
+}
+
+export async function updateVariant(productId, variantId, formData, onUploadProgress){
+    const response = await apiClient.put(`/products/${productId}/variants/${variantId}`, formData, { onUploadProgress });
+    return response.data;
+}
+
+export async function deleteVariant(productId, variantId){
+    const response = await apiClient.delete(`/products/${productId}/variants/${variantId}`);
     return response.data;
 }

@@ -65,6 +65,10 @@ const productSchema = new mongoose.Schema({
       },
     },
   ],
+}, {
+  // Serialize variant attribute Maps as plain objects in API responses
+  toJSON: { flattenMaps: true },
+  toObject: { flattenMaps: true },
 });
 
 const productModel = mongoose.model("product", productSchema);

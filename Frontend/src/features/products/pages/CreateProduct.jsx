@@ -5,6 +5,7 @@ import { useProduct } from "../hook/useProduct.js";
 import { SidebarContent, Icon, I } from "./Dashboard";
 import AuthLoader from "../../auth/components/AuthLoader";
 import { getErrorMessage } from "../../../App/api.client";
+import { cleanDecimal, selectOnFocus } from "../utils/numeric";
 
 const CURRENCIES = [
   { code: "INR", symbol: "₹" },
@@ -194,9 +195,15 @@ const CreateProduct = () => {
     setProgress(0);
     try {
       const onProgress = (ev) => ev.total && setProgress(Math.round((ev.loaded / ev.total) * 100));
-      if (isEdit) await handleUpdateProduct(productId, formData, onProgress);
-      else await handleCreateProduct(formData, onProgress);
+      const saved = isEdit
+        ? await handleUpdateProduct(productId, formData, onProgress)
+        : await handleCreateProduct(formData, onProgress);
       setProgress(100);
+      // The product page is where variants and stock are managed next
+      if (saved?._id) {
+        navigate(`/seller/product/${saved._id}`, { replace: true, state: isEdit ? { toast: "Changes saved" } : { firstVariant: true } });
+        return;
+      }
       setSuccess(true);
     } catch (err) {
       setSubmitError(getErrorMessage(err, isEdit ? "Couldn't save your changes. Please try again." : "Couldn't publish this piece. Please try again."));
@@ -286,8 +293,8 @@ const CreateProduct = () => {
                     </div>
                     <div className="relative flex-1 min-w-0">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#131610]/45 pointer-events-none">{symbol}</span>
-                      <input id="price" type="number" inputMode="decimal" min="0" step="0.01" value={priceAmount}
-                        onChange={(e) => setPriceAmount(e.target.value)} onBlur={() => setTouched((t) => ({ ...t, price: true }))}
+                      <input id="price" type="text" inputMode="decimal" value={priceAmount} onFocus={selectOnFocus}
+                        onChange={(e) => setPriceAmount(cleanDecimal(e.target.value))} onBlur={() => setTouched((t) => ({ ...t, price: true }))}
                         placeholder="1,200.00" aria-invalid={!!show("price")} aria-describedby={show("price") ? "price-err" : undefined}
                         className={`${inputBase} pl-9 tabular-nums no-spin ${inputState(show("price"))}`} />
                     </div>
@@ -383,7 +390,7 @@ const CreateProduct = () => {
         {/* Sticky action bar */}
         <div className="fixed bottom-0 inset-x-0 lg:left-60 z-20 bg-white/85 backdrop-blur-md border-t border-black/10">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-3 sm:py-4 flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <button type="button" onClick={() => navigate("/seller/dashboard")}
+            <button type="button" onClick={() => (window.history.state?.idx > 0 ? navigate(-1) : navigate("/seller/dashboard"))}
               className="btn-press h-12 sm:h-11 px-6 rounded-lg border border-black/15 bg-white text-[12px] font-semibold uppercase tracking-widest hover:border-[#131610] transition-colors">
               Cancel
             </button>
@@ -420,7 +427,7 @@ const CreateProduct = () => {
   );
 };
 
-const STYLES = `
+export const STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Manrope:wght@500;600;700;800&display=swap');
 .font-manrope { font-family: 'Manrope', 'Inter', sans-serif; }
 .font-cormorant { font-family: 'Cormorant Garamond', Georgia, serif; }

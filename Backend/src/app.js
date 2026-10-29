@@ -72,6 +72,9 @@ app.use((err, req, res, next) => {
   if (err.name === "ValidationError" || err.name === "CastError") {
     return res.status(400).json({ message: err.message, success: false });
   }
+  if (err.status >= 400 && err.status < 500) {
+    return res.status(err.status).json({ message: err.message, success: false });
+  }
   console.error(err);
   res.status(err.status || 500).json({ message: "Something went wrong. Please try again.", success: false });
 });

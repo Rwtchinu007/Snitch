@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import { useProduct } from "../hook/useProduct";
 import { useAuth } from "../../auth/hook/useAuth";
 import { getErrorMessage } from "../../../App/api.client";
+import { PATHS } from "../../../App/paths";
 
 const SORTS = [
   { value: "newest", label: "Newest" },
@@ -13,13 +14,6 @@ const SORTS = [
 
 const formatPrice = (amount, currency = "INR", decimals = 2) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency, minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(amount || 0);
-
-// Mongo ObjectIds encode their creation time in the first 4 bytes
-const createdAt = (p) => {
-  if (p.createdAt) return new Date(p.createdAt);
-  const ts = parseInt(String(p._id).slice(0, 8), 16);
-  return Number.isFinite(ts) && String(p._id).length === 24 ? new Date(ts * 1000) : null;
-};
 
 /* ─── Icons ──────────────────────────────────────────────────────────── */
 export const Icon = ({ d, className = "w-5 h-5" }) => (
@@ -62,29 +56,10 @@ const useInView = () => {
   return [ref, visible];
 };
 
-const useCountUp = (target, run, duration = 900) => {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!run) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let raf;
-    const start = performance.now() - (reduced ? duration : 0);
-    const tick = (now) => {
-      const t = Math.min((now - start) / duration, 1);
-      setValue(target * (1 - Math.pow(1 - t, 3)));
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, run, duration]);
-  return value;
-};
-
 /* ─── Sidebar ────────────────────────────────────────────────────────── */
 const NAV = [
-  { key: "overview", label: "Overview", to: "/seller/dashboard" },
-  { key: "products", label: "Products", to: "/seller/dashboard#products" },
-  { key: "add", label: "Add Product", to: "/seller/create-product" },
+  { key: "products", label: "Products", to: PATHS.sellerDashboard },
+  { key: "add", label: "Add Product", to: PATHS.createProduct },
   { key: "orders", label: "Orders" },
   { key: "analytics", label: "Analytics" },
   { key: "settings", label: "Settings" },
@@ -116,7 +91,6 @@ export const SidebarContent = ({ active, setActive, user, onNavigate }) => {
               onClick={() => {
                 setActive(n.key);
                 if (n.to) navigate(n.to);
-                if (n.key === "products") document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
                 onNavigate?.();
               }}
               style={{ height: NAV_ITEM_H }}
@@ -146,136 +120,113 @@ export const SidebarContent = ({ active, setActive, user, onNavigate }) => {
   );
 };
 
-/* ─── Stat card ──────────────────────────────────────────────────────── */
-const StatCard = ({ label, value, format, note, accent, index, run }) => {
-  const animated = useCountUp(typeof value === "number" ? value : 0, run);
+/* ─── Seller shell (sidebar + mobile top bar) ────────────────────────── */
+export const SellerShell = ({ active, children }) => {
+  const user = useSelector((state) => state.auth?.user);
+  const [drawer, setDrawer] = useState(false);
+  const [current, setCurrent] = useState(active);
+
+  useEffect(() => {
+    if (!drawer) return;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, [drawer]);
+
   return (
-    <div
-      style={{ animationDelay: `${120 + index * 80}ms` }}
-      className="animate-rise bg-white rounded-xl border border-black/10 border-t-2 border-t-[#131610] shadow-[0_1px_2px_rgba(19,22,16,0.04)] p-5 sm:p-6"
-    >
-      <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-widest text-[#131610]/50">{label}</p>
-      <p className={`mt-3 font-manrope font-bold text-2xl sm:text-3xl tracking-tight tabular-nums truncate ${accent ? "text-[#104292]" : "text-[#131610]"}`}>
-        {typeof value === "number" ? format(animated) : value}
-      </p>
-      <p className="mt-1.5 text-xs text-[#131610]/45 truncate">{note}</p>
+    <div className="min-h-screen bg-[#FAFAFA] text-[#131610] font-inter overflow-x-hidden">
+      <style>{DASHBOARD_STYLES}</style>
+      <aside className="hidden lg:block fixed inset-y-0 left-0 w-60 bg-white border-r border-black/10 z-30">
+        <SidebarContent active={current} setActive={setCurrent} user={user} />
+      </aside>
+      <header className="lg:hidden sticky top-0 z-30 h-16 px-4 flex items-center justify-between bg-white/85 backdrop-blur-md border-b border-black/10">
+        <button onClick={() => setDrawer(true)} aria-label="Open menu" className="btn-press w-11 h-11 -ml-2 grid place-items-center"><Icon d={I.menu} /></button>
+        <span className="font-manrope font-extrabold text-lg tracking-[0.35em]">SNITCH</span>
+        <span className="w-11" />
+      </header>
+      <div className={`lg:hidden fixed inset-0 z-50 ${drawer ? "" : "pointer-events-none"}`}>
+        <div onClick={() => setDrawer(false)} className={`absolute inset-0 bg-[#131610]/40 transition-opacity duration-300 ${drawer ? "opacity-100" : "opacity-0"}`} />
+        <aside className={`absolute inset-y-0 left-0 w-[80%] max-w-[280px] bg-white transition-transform duration-300 ease-out ${drawer ? "translate-x-0" : "-translate-x-full"}`}>
+          <button onClick={() => setDrawer(false)} aria-label="Close menu" className="absolute top-2.5 right-2 w-11 h-11 grid place-items-center z-10"><Icon d={I.close} /></button>
+          <SidebarContent active={current} setActive={setCurrent} user={user} onNavigate={() => setDrawer(false)} />
+        </aside>
+      </div>
+      <main className="lg:pl-60">{children}</main>
     </div>
   );
 };
 
-/* ─── Product card (grid) ────────────────────────────────────────────── */
-const SellerCard = ({ product, index, onEdit, onDelete }) => {
+export const Toast = ({ message }) => (
+  <div className="fixed z-[70] bottom-4 inset-x-4 sm:inset-x-auto sm:right-6 sm:bottom-6 pointer-events-none" aria-live="polite">
+    {message && (
+      <div className="animate-rise flex items-center gap-2.5 px-4 h-12 rounded-lg bg-[#131610] text-white text-sm shadow-lg">
+        <span className="w-1.5 h-1.5 rounded-full bg-white" /> {message}
+      </div>
+    )}
+  </div>
+);
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const stockSummary = (p) => {
+  const count = p.variants?.length || 0;
+  if (!count) return null;
+  const stock = p.totalStock ?? p.variants.reduce((s, v) => s + (Number(v.stock) || 0), 0);
+  return `${count} ${count === 1 ? "variant" : "variants"} · ${stock.toLocaleString("en-IN")} in stock`;
+};
+
+/* ─── Product card ───────────────────────────────────────────────────── */
+const SellerCard = ({ product, index }) => {
   const [ref, visible] = useInView();
   const [hovered, setHovered] = useState(false);
   const images = product.images?.length ? product.images : [{ url: "" }];
   const hasSecond = images.length > 1;
+  const summary = stockSummary(product);
+  const soldOut = product.hasVariants && !product.inStock;
 
   return (
-    <article
+    <Link
       ref={ref}
+      to={PATHS.sellerProduct(product._id)}
       style={{ transitionDelay: `${(index % 4) * 70}ms` }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`group h-full flex flex-col bg-white rounded-xl border border-black/10 shadow-[0_1px_2px_rgba(19,22,16,0.04)] overflow-hidden transition-all duration-500 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+      className={`group h-full flex flex-col bg-white rounded-xl border border-black/10 shadow-[0_1px_2px_rgba(19,22,16,0.04)] overflow-hidden transition-all duration-500 ease-out hover:-translate-y-0.5 hover:border-black/20 hover:shadow-[0_10px_30px_rgba(19,22,16,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#104292] ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#D4CFC8]">
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#D4CFC8]">
         <img src={images[0].url || undefined} alt={product.title} loading="lazy"
           className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${hasSecond ? (hovered ? "opacity-0" : "opacity-100") : "group-hover:scale-[1.04]"}`} />
         {hasSecond && (
           <img src={images[1].url} alt="" loading="lazy"
             className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${hovered ? "opacity-100 scale-[1.04]" : "opacity-0"}`} />
         )}
-
-        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full border border-white/60 bg-white/85 backdrop-blur-sm text-[10px] font-semibold uppercase tracking-widest text-[#131610]">
-          {product.images?.length || 0} {product.images?.length === 1 ? "Photo" : "Photos"}
-        </span>
-
-        <div className="absolute top-2 right-2 flex gap-1 lg:opacity-0 lg:translate-y-1 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 lg:focus-within:opacity-100 transition-all duration-200 ease-out">
-          {[
-            { label: "Edit", icon: I.edit, fn: onEdit },
-            { label: "Delete", icon: I.trash, fn: onDelete },
-          ].map((a) => (
-            <button key={a.label} onClick={() => a.fn(product)} aria-label={`${a.label} ${product.title}`} className="btn-press w-11 h-11 grid place-items-center">
-              <span className="w-9 h-9 rounded-full bg-white shadow-sm grid place-items-center text-[#131610] hover:text-[#104292] transition-colors">
-                <Icon d={a.icon} className="w-4 h-4" />
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {hasSecond && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {images.slice(0, 5).map((im, i) => (
-              <span key={im._id || i} className={`h-1.5 rounded-full transition-all duration-300 ${(hovered ? 1 : 0) === i ? "w-4 bg-white" : "w-1.5 bg-white/60"}`} />
-            ))}
-          </div>
-        )}
       </div>
-
-      <div className="flex flex-col flex-1 p-4">
-        <h3 className="font-manrope font-semibold text-[15px] text-[#131610] truncate"><Link to={`/product/${product._id}`} className="title-underline">{product.title}</Link></h3>
-        <p className="mt-1 text-[13px] leading-relaxed text-[#131610]/55 line-clamp-2 min-h-[2.6em]">{product.description}</p>
+      <div className="flex flex-col flex-1 p-3">
+        <h3 className="font-manrope font-semibold text-[13px] sm:text-sm text-[#131610] truncate"><span className="title-underline">{product.title}</span></h3>
+        <p className={`mt-1 text-[12px] ${summary ? "text-[#131610]/65" : "text-[#131610]/40"}`}>{summary || "No variants yet"}</p>
         <div className="mt-auto pt-4">
-          <div className="pt-3 border-t border-black/10 flex items-center justify-between">
-            <span className="text-sm font-semibold tabular-nums text-[#131610]">{formatPrice(product.price?.amount, product.price?.currency)}</span>
-            <StatusChip />
+          <div className="pt-3 border-t border-black/10 flex flex-wrap items-center justify-between gap-2 min-w-0">
+            <span className="text-sm font-semibold tabular-nums text-[#131610]">{formatPrice(product.minPrice ?? product.price?.amount, product.price?.currency)}</span>
+            <StatusChip soldOut={soldOut} />
           </div>
         </div>
       </div>
-    </article>
+    </Link>
   );
 };
 
-const StatusChip = () => (
-  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#C288A2]/40 text-[10px] font-semibold uppercase tracking-widest text-[#C288A2]">
-    <span className="w-1.5 h-1.5 rounded-full bg-[#C288A2]" /> Live
+const StatusChip = ({ soldOut }) => soldOut ? (
+  <span className="inline-flex items-center whitespace-nowrap gap-1.5 px-2.5 py-1 rounded-full bg-black/5 text-[10px] font-semibold uppercase tracking-widest text-[#131610]/45">Sold out</span>
+) : (
+  <span className="inline-flex items-center whitespace-nowrap gap-1.5 px-2.5 py-1 rounded-full border border-[#104292]/20 text-[10px] font-semibold uppercase tracking-widest text-[#104292]">
+    <span className="w-1.5 h-1.5 rounded-full bg-[#104292]" /> Live
   </span>
-);
-
-/* ─── Product table (list) ───────────────────────────────────────────── */
-const ProductTable = ({ products, onEdit, onDelete }) => (
-  <div className="animate-rise bg-white rounded-xl border border-black/10 shadow-[0_1px_2px_rgba(19,22,16,0.04)] overflow-x-auto">
-    <table className="w-full text-left min-w-[640px]">
-      <thead className="sticky top-0 bg-white">
-        <tr className="border-b border-black/10">
-          {["Product", "Description", "Price", "Images", "Status", ""].map((h, i) => (
-            <th key={i} className={`px-5 py-4 text-[10px] font-semibold uppercase tracking-widest text-[#131610]/50 ${h === "Price" ? "text-right" : ""}`}>{h}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-black/10">
-        {products.map((p) => (
-          <tr key={p._id} className="group hover:bg-[#FAFAFA] transition-colors">
-            <td className="px-5 py-3">
-              <div className="flex items-center gap-3">
-                <img src={p.images?.[0]?.url} alt="" className="w-12 h-[60px] rounded-md object-cover bg-[#D4CFC8] shrink-0" />
-                <span className="font-manrope font-semibold text-sm text-[#131610] truncate max-w-[180px]"><Link to={`/product/${p._id}`} className="title-underline">{p.title}</Link></span>
-              </div>
-            </td>
-            <td className="px-5 py-3 text-[13px] text-[#131610]/55 max-w-[280px]"><span className="line-clamp-2">{p.description}</span></td>
-            <td className="px-5 py-3 text-sm font-semibold tabular-nums text-right whitespace-nowrap">{formatPrice(p.price?.amount, p.price?.currency)}</td>
-            <td className="px-5 py-3 text-sm tabular-nums text-[#131610]/70">{p.images?.length || 0}</td>
-            <td className="px-5 py-3"><StatusChip /></td>
-            <td className="px-3 py-3">
-              <div className="flex justify-end">
-                <button onClick={() => onEdit(p)} aria-label={`Edit ${p.title}`} className="btn-press w-11 h-11 grid place-items-center rounded-lg text-[#131610]/60 hover:text-[#104292] transition-colors"><Icon d={I.edit} className="w-4 h-4" /></button>
-                <button onClick={() => onDelete(p)} aria-label={`Delete ${p.title}`} className="btn-press w-11 h-11 grid place-items-center rounded-lg text-[#131610]/60 hover:text-[#131610] transition-colors"><Icon d={I.trash} className="w-4 h-4" /></button>
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
 );
 
 const SkeletonCard = () => (
   <div className="bg-white rounded-xl border border-black/10 overflow-hidden">
-    <div className="aspect-[4/5] shimmer" />
+    <div className="aspect-[3/4] shimmer" />
     <div className="p-4">
       <div className="h-4 w-3/4 rounded shimmer" />
-      <div className="h-3 w-full mt-2 rounded shimmer" />
-      <div className="h-3 w-2/3 mt-1.5 rounded shimmer" />
+      <div className="h-3 w-1/2 mt-2 rounded shimmer" />
       <div className="h-px bg-black/10 mt-4" />
       <div className="h-4 w-1/3 mt-3 rounded shimmer" />
     </div>
@@ -285,224 +236,115 @@ const SkeletonCard = () => (
 /* ─── Dashboard ──────────────────────────────────────────────────────── */
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { handleGetSellerProducts, handleDeleteProduct } = useProduct();
+  const location = useLocation();
+  const { handleGetSellerProducts } = useProduct();
   const sellerProducts = useSelector((state) => state.products.sellerProducts);
-  const user = useSelector((state) => state.auth?.user);
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [drawer, setDrawer] = useState(false);
-  const [activeNav, setActiveNav] = useState("overview");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("newest");
-  const [view, setView] = useState("grid");
-  const [toDelete, setToDelete] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
+  const [toast, setToast] = useState(location.state?.toast || "");
 
+  // Always refetch so variant and stock changes made on the product page show up here
   useEffect(() => {
     handleGetSellerProducts()
       .catch((err) => setLoadError(getErrorMessage(err, "Couldn't load your products.")))
       .finally(() => setLoading(false));
   }, [handleGetSellerProducts]);
 
+  // Show a toast handed over by the previous page once, then drop it from history state
   useEffect(() => {
-    document.body.style.overflow = drawer || toDelete ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [drawer, toDelete]);
-
+    if (!location.state?.toast) return;
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.state, location.pathname, navigate]);
   useEffect(() => {
-    if (!toDelete) return;
-    const onKey = (e) => e.key === "Escape" && !deleting && setToDelete(null);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [toDelete, deleting]);
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 3500);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   // The API returns newest first
   const products = useMemo(() => sellerProducts || [], [sellerProducts]);
+  const priceOf = (p) => p.minPrice ?? p.price?.amount ?? 0;
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
     let list = products.filter((p) => !q || `${p.title} ${p.description}`.toLowerCase().includes(q));
-    if (sort === "asc") list = [...list].sort((a, b) => (a.price?.amount || 0) - (b.price?.amount || 0));
-    else if (sort === "desc") list = [...list].sort((a, b) => (b.price?.amount || 0) - (a.price?.amount || 0));
+    if (sort === "asc") list = [...list].sort((a, b) => priceOf(a) - priceOf(b));
+    else if (sort === "desc") list = [...list].sort((a, b) => priceOf(b) - priceOf(a));
     return list;
   }, [products, search, sort]);
 
-  const totalValue = products.reduce((s, p) => s + (p.price?.amount || 0), 0);
-  const avgPrice = products.length ? totalValue / products.length : 0;
-  const latest = products[0];
-  const latestDate = latest && createdAt(latest);
-
-  const firstName = (user?.fullname || user?.name || "").split(" ")[0];
-  const goAdd = () => navigate("/seller/create-product");
-
-  const closeDelete = () => {
-    if (deleting) return;
-    setToDelete(null);
-    setDeleteError("");
-  };
-
-  const confirmDelete = async () => {
-    setDeleting(true);
-    setDeleteError("");
-    try {
-      await handleDeleteProduct(toDelete._id);
-      setToDelete(null);
-    } catch (err) {
-      setDeleteError(getErrorMessage(err, "Couldn't delete this piece. Please try again."));
-    } finally {
-      setDeleting(false);
-    }
-  };
+  const totalStock = products.reduce((s, p) => s + (p.totalStock || 0), 0);
+  const goAdd = () => navigate(PATHS.createProduct);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-[#131610] font-inter overflow-x-hidden">
-      <style>{DASHBOARD_STYLES}</style>
+    <SellerShell active="products">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10 lg:py-14">
+        {/* Header */}
+        <section className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="animate-rise text-[11px] font-semibold uppercase tracking-[0.3em] text-[#131610]/50 inline-flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#131610]" /> Seller Studio
+            </p>
+            <h1 className="animate-rise [animation-delay:60ms] mt-3 font-cormorant font-light text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight">Products</h1>
+            <p className="animate-rise [animation-delay:120ms] mt-3 text-sm text-[#131610]/55 tabular-nums">
+              {loading ? "Loading…" : `${products.length} ${products.length === 1 ? "product" : "products"} · ${totalStock.toLocaleString("en-IN")} in stock`}
+            </p>
+          </div>
+          <button onClick={goAdd} className="animate-rise [animation-delay:180ms] btn-press w-full md:w-auto h-12 px-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#131610] text-white text-[12px] font-semibold uppercase tracking-widest hover:bg-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#104292] focus-visible:ring-offset-2">
+            <Icon d={I.plus} className="w-4 h-4" /> Add Product
+          </button>
+        </section>
 
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:block fixed inset-y-0 left-0 w-60 bg-white border-r border-black/10 z-30">
-        <SidebarContent active={activeNav} setActive={setActiveNav} user={user} />
-      </aside>
+        {/* Toolbar */}
+        <section className="mt-10 flex flex-col sm:flex-row gap-3 pb-5 border-b border-black/10">
+          <label className="relative flex-1 sm:max-w-xs">
+            <Icon d={I.search} className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#131610]/40 pointer-events-none" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products…" aria-label="Search products"
+              className="w-full h-11 pl-9 pr-3 rounded-lg border border-black/10 bg-white text-base sm:text-sm outline-none placeholder:text-[#131610]/40 focus:border-[#104292] focus:ring-2 focus:ring-[#104292]/20 transition" />
+          </label>
+          <div className="relative sm:ml-auto">
+            <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort products"
+              className="w-full appearance-none h-11 pl-4 pr-9 rounded-lg border border-black/10 bg-white text-[12px] font-medium uppercase tracking-widest outline-none cursor-pointer focus:ring-2 focus:ring-[#104292]/20 focus:border-[#104292]">
+              {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+            <Icon d={I.chevron} className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#131610]/50" />
+          </div>
+        </section>
 
-      {/* Mobile top bar */}
-      <header className="lg:hidden sticky top-0 z-30 h-16 px-4 flex items-center justify-between bg-white/85 backdrop-blur-md border-b border-black/10">
-        <button onClick={() => setDrawer(true)} aria-label="Open menu" className="btn-press w-11 h-11 -ml-2 grid place-items-center"><Icon d={I.menu} /></button>
-        <span className="font-manrope font-extrabold text-lg tracking-[0.35em]">SNITCH</span>
-        <button onClick={goAdd} aria-label="Add product" className="btn-press w-11 h-11 -mr-2 grid place-items-center"><Icon d={I.plus} /></button>
-      </header>
-
-      {/* Mobile drawer */}
-      <div className={`lg:hidden fixed inset-0 z-50 ${drawer ? "" : "pointer-events-none"}`}>
-        <div onClick={() => setDrawer(false)} className={`absolute inset-0 bg-[#131610]/40 transition-opacity duration-300 ${drawer ? "opacity-100" : "opacity-0"}`} />
-        <aside className={`absolute inset-y-0 left-0 w-[80%] max-w-[280px] bg-white transition-transform duration-300 ease-out ${drawer ? "translate-x-0" : "-translate-x-full"}`}>
-          <button onClick={() => setDrawer(false)} aria-label="Close menu" className="absolute top-2.5 right-2 w-11 h-11 grid place-items-center z-10"><Icon d={I.close} /></button>
-          <SidebarContent active={activeNav} setActive={setActiveNav} user={user} onNavigate={() => setDrawer(false)} />
-        </aside>
-      </div>
-
-      <main className="lg:pl-60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10 lg:py-14">
-          {/* Header */}
-          <section className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="animate-rise text-[11px] font-semibold uppercase tracking-[0.3em] text-[#131610]/50 inline-flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#131610]" /> Seller Studio
+        <section className="pt-8">
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-x-4 gap-y-8">
+              {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : loadError ? (
+            <div className="flex flex-col items-center text-center py-20 bg-white rounded-xl border border-dashed border-[#D4CFC8]">
+              <h3 className="font-manrope font-bold text-2xl tracking-tight">Couldn't load your products</h3>
+              <p className="mt-2 max-w-sm text-sm text-[#131610]/55">{loadError}</p>
+              <button onClick={() => window.location.reload()} className="btn-press mt-8 h-12 px-8 rounded-lg border border-black/15 bg-white text-[12px] font-semibold uppercase tracking-widest">Try again</button>
+            </div>
+          ) : visible.length === 0 ? (
+            <div className="flex flex-col items-center text-center py-20 bg-white rounded-xl border border-dashed border-[#D4CFC8]">
+              <Icon d={search ? I.search : I.hanger} className="w-12 h-12 text-[#D4CFC8]" />
+              <h3 className="mt-6 font-manrope font-bold text-2xl tracking-tight">{search ? "No products match" : "No products yet"}</h3>
+              <p className="mt-2 max-w-sm text-sm text-[#131610]/55">
+                {search ? `Nothing matches “${search}”. Try a different search.` : "Use Add Product above to list your first piece."}
               </p>
-              <h1 className="animate-rise [animation-delay:60ms] mt-3 font-cormorant font-light text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight">
-                {firstName ? `Welcome back, ${firstName}` : "Your Collection"}
-              </h1>
-              <p className="animate-rise [animation-delay:120ms] mt-3 text-[15px] text-[#131610]/55">Manage your pieces, pricing and imagery in one place.</p>
-            </div>
-            <button onClick={goAdd} className="animate-rise [animation-delay:180ms] btn-press w-full md:w-auto h-12 px-6 inline-flex items-center justify-center gap-2 rounded-lg bg-[#131610] text-white text-[12px] font-semibold uppercase tracking-widest hover:bg-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#104292] focus-visible:ring-offset-2">
-              <Icon d={I.plus} className="w-4 h-4" /> Add Product
-            </button>
-          </section>
-
-          {/* Stats */}
-          <section className="mt-10 lg:mt-12 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            {loading ? (
-              Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-[124px] sm:h-[136px] rounded-xl shimmer" />)
-            ) : (
-              <>
-                <StatCard index={0} run label="Total Products" value={products.length} format={(v) => Math.round(v)} note="Pieces listed" />
-                <StatCard index={1} run accent label="Inventory Value" value={totalValue} format={(v) => formatPrice(v, "INR", 0)} note="Sum of listed prices" />
-                <StatCard index={2} run label="Average Price" value={avgPrice} format={(v) => formatPrice(v, "INR", 0)} note="Per piece" />
-                <StatCard index={3} label="Latest Upload"
-                  value={latestDate ? latestDate.toLocaleDateString("en-IN", { day: "numeric", month: "short" }) : "—"}
-                  note={latest?.title || "Nothing yet"} />
-              </>
-            )}
-          </section>
-
-          {/* Products */}
-          <section id="products" className="mt-12 lg:mt-16 scroll-mt-20">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between pb-5 border-b border-black/10">
-              <div className="flex items-baseline gap-3">
-                <h2 className="font-manrope font-bold text-2xl tracking-tight">Products</h2>
-                <span className="text-[12px] font-semibold uppercase tracking-widest text-[#131610]/45 tabular-nums">{loading ? "—" : visible.length}</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <label className="relative flex-1 min-w-[180px] sm:flex-none">
-                  <Icon d={I.search} className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#131610]/40 pointer-events-none" />
-                  <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search pieces…" aria-label="Search products"
-                    className="w-full sm:w-60 h-11 pl-9 pr-3 rounded-lg border border-black/10 bg-white text-sm outline-none placeholder:text-[#131610]/40 focus:border-[#104292] focus:ring-2 focus:ring-[#104292]/20 transition" />
-                </label>
-                <div className="relative">
-                  <select value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort products"
-                    className="appearance-none h-11 pl-4 pr-9 rounded-lg border border-black/10 bg-white text-[12px] font-medium uppercase tracking-widest outline-none cursor-pointer focus:ring-2 focus:ring-[#104292]/20 focus:border-[#104292]">
-                    {SORTS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                  </select>
-                  <Icon d={I.chevron} className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#131610]/50" />
-                </div>
-                <div className="flex h-11 p-1 rounded-lg border border-black/10 bg-white" role="group" aria-label="View mode">
-                  {["grid", "list"].map((v) => (
-                    <button key={v} onClick={() => setView(v)} aria-pressed={view === v} aria-label={`${v} view`}
-                      className={`w-10 grid place-items-center rounded-md transition-colors duration-200 ${view === v ? "bg-[#131610] text-white" : "text-[#131610]/50 hover:text-[#131610]"}`}>
-                      <Icon d={I[v]} className="w-4 h-4" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-8">
-              {loading ? (
-                <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10">
-                  {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
-                </div>
-              ) : loadError ? (
-                <div className="flex flex-col items-center text-center py-20 bg-white rounded-xl border border-dashed border-[#D4CFC8]">
-                  <h3 className="font-manrope font-bold text-2xl tracking-tight">Couldn't load your pieces</h3>
-                  <p className="mt-2 max-w-sm text-sm text-[#131610]/55">{loadError}</p>
-                  <button onClick={() => window.location.reload()} className="btn-press mt-8 h-12 px-8 rounded-lg border border-black/15 bg-white text-[12px] font-semibold uppercase tracking-widest">Try again</button>
-                </div>
-              ) : visible.length === 0 ? (
-                <div className="flex flex-col items-center text-center py-20 bg-white rounded-xl border border-dashed border-[#D4CFC8]">
-                  <Icon d={search ? I.search : I.hanger} className="w-12 h-12 text-[#D4CFC8]" />
-                  <h3 className="mt-6 font-manrope font-bold text-2xl tracking-tight">{search ? "No pieces match" : "No pieces listed yet"}</h3>
-                  <p className="mt-2 max-w-sm text-sm text-[#131610]/55">
-                    {search ? `Nothing matches “${search}”. Try a different search.` : "Your collection is a blank canvas. List your first piece to start selling on Snitch."}
-                  </p>
-                  {search ? (
-                    <button onClick={() => setSearch("")} className="btn-press mt-8 h-12 px-8 rounded-lg border border-black/15 bg-white text-[12px] font-semibold uppercase tracking-widest">Clear search</button>
-                  ) : (
-                    <button onClick={goAdd} className="btn-press mt-8 h-12 px-8 rounded-lg bg-[#131610] text-white text-[12px] font-semibold uppercase tracking-widest">Add your first product</button>
-                  )}
-                </div>
-              ) : view === "grid" ? (
-                <div className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10">
-                  {visible.map((p, i) => (
-                    <SellerCard key={p._id} product={p} index={i} onEdit={(x) => navigate(`/seller/edit-product/${x._id}`)} onDelete={setToDelete} />
-                  ))}
-                </div>
-              ) : (
-                <ProductTable products={visible} onEdit={(x) => navigate(`/seller/edit-product/${x._id}`)} onDelete={setToDelete} />
+              {search && (
+                <button onClick={() => setSearch("")} className="btn-press mt-8 h-12 px-8 rounded-lg border border-black/15 bg-white text-[12px] font-semibold uppercase tracking-widest">Clear search</button>
               )}
             </div>
-          </section>
-        </div>
-      </main>
-
-      {/* Delete modal */}
-      {toDelete && (
-        <div className="fixed inset-0 z-50 grid place-items-center p-4" role="dialog" aria-modal="true" aria-labelledby="delete-title">
-          <div onClick={closeDelete} className="absolute inset-0 bg-[#131610]/45 backdrop-blur-[2px] animate-fade" />
-          <div className="animate-rise relative w-full max-w-sm bg-white rounded-xl border border-black/10 shadow-xl p-6 sm:p-7">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#131610]/45 inline-flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C288A2]" /> Remove piece
-            </p>
-            <h3 id="delete-title" className="mt-3 font-manrope font-bold text-xl tracking-tight">Delete “{toDelete.title}”?</h3>
-            <p className="mt-2 text-sm text-[#131610]/55 leading-relaxed">This piece will be removed from your collection and the storefront. This can’t be undone.</p>
-            {deleteError && <p role="alert" className="mt-3 text-xs text-[#B4534B]">{deleteError}</p>}
-            <div className="mt-7 flex flex-col-reverse sm:flex-row gap-3">
-              <button autoFocus onClick={closeDelete} disabled={deleting} className="btn-press flex-1 h-11 rounded-lg border border-black/15 bg-white text-[12px] font-semibold uppercase tracking-widest">Cancel</button>
-              <button onClick={confirmDelete} disabled={deleting} className="btn-press flex-1 h-11 inline-flex items-center justify-center gap-2 rounded-lg bg-[#131610] text-white text-[12px] font-semibold uppercase tracking-widest disabled:opacity-60">{deleting && <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />}{deleting ? "Deleting…" : "Delete"}</button>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-x-4 gap-y-8">
+              {visible.map((p, i) => <SellerCard key={p._id} product={p} index={i} />)}
             </div>
-          </div>
-        </div>
-      )}
-    </div>
+          )}
+        </section>
+      </div>
+      <Toast message={toast} />
+    </SellerShell>
   );
 };
 

@@ -9,7 +9,7 @@ function validateProduct(req,res,next){
 }
 
 export const createProductValidator = [
-    body("title").notEmpty().withMessage("Title is required"),
+    body("title").trim().notEmpty().withMessage("Title is required"),
     body("description").optional().isString().isLength({ max: 500 }).withMessage("Description must be under 500 characters"),
     body("priceAmount").isFloat({ gt: 0 }).withMessage("Price must be a number greater than zero"),
     body("priceCurrency").optional().isString().withMessage("Price currency must be a string"),

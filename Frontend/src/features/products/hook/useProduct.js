@@ -1,4 +1,4 @@
-import { createProduct, updateProduct, deleteProduct, getSellerProduct, getAllProducts, getProductById } from "../services/product.api";
+import { createProduct, updateProduct, deleteProduct, getSellerProduct, getAllProducts, getProductById, createVariant, updateVariant, deleteVariant } from "../services/product.api";
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { setSellerProducts, setProducts, removeSellerProduct } from "../state/product.slice";
@@ -39,5 +39,19 @@ export const useProduct = () => {
         return data.products;
     }, [dispatch]);
 
-    return { handleCreateProduct, handleUpdateProduct, handleDeleteProduct, handleGetSellerProducts, handleGetAllProducts, handleGetProductById };
+    const handleCreateVariant = useCallback(async (productId, formData, onUploadProgress) => {
+        const data = await createVariant(productId, formData, onUploadProgress);
+        return data.variant;
+    }, []);
+
+    const handleUpdateVariant = useCallback(async (productId, variantId, formData, onUploadProgress) => {
+        const data = await updateVariant(productId, variantId, formData, onUploadProgress);
+        return data.variant;
+    }, []);
+
+    const handleDeleteVariant = useCallback(async (productId, variantId) => {
+        await deleteVariant(productId, variantId);
+    }, []);
+
+    return { handleCreateProduct, handleUpdateProduct, handleDeleteProduct, handleGetSellerProducts, handleGetAllProducts, handleGetProductById, handleCreateVariant, handleUpdateVariant, handleDeleteVariant };
 }
